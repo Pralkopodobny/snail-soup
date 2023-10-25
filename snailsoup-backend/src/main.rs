@@ -1,6 +1,9 @@
 use sqlx::postgres::PgPoolOptions;
+mod db;
+mod domain;
 
-struct Expense {id: uuid::Uuid, expense_date: sqlx::types::time::Date, tag: String}
+use crate::db::AppUserRepository;
+
 
 #[tokio::main]
 async fn main() -> Result<(), sqlx::Error> {
@@ -12,26 +15,17 @@ async fn main() -> Result<(), sqlx::Error> {
         .max_connections(5)
         .connect("postgres://postgres:password@localhost/snailsoup").await?;
 
-    // Make a simple query to return the given parameter (use a question mark `?` instead of `$1` for MySQL)
-    let row: (i64,) = sqlx::query_as("SELECT $1")
-        .bind(150_i64)
-        .fetch_one(&pool).await?;
+    let kok = db::MyAppUserRepository{pool: pool};
+    let user = kok.get(uuid::Uuid::parse_str("ca94889f-4375-4e28-b45c-8c23f12d86d4").unwrap()).await;
 
-    assert_eq!(row.0, 150);
-    print!("{}", row.0);
-
-    
-
-    let expenses = sqlx::query_as!(Expense,
-        "
-        SELECT id, expense_date, tag FROM expenses
-        "
-    ).fetch_all(&pool)
-    .await?;
-
-    for expense in expenses {
-        print!("{}", expense.expense_date)
-    }
+    let koko = match user {
+        Ok(user_opt) => match user_opt {
+            None => "no user with such id".to_string(),
+            Some(user) => user.username
+        },
+        Err(_) => "Error!".to_string()
+    };
+    print!("\n{}\n", koko);
 
     Ok(())
 }

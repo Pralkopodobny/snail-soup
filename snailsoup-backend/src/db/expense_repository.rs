@@ -13,7 +13,7 @@ impl<'a> ExpenseRepository<'a> {
         let user = sqlx::query_as!(
             Expense,
             "
-            SELECT id, user_id, category_id, description, expense_date, cost FROM expenses WHERE id = $1
+            SELECT id, user_id, description, expense_date, cost FROM expenses WHERE id = $1
             ",
             id
         )

@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS expense_tags;
 DROP TABLE IF EXISTS expenses;
-DROP TABLE IF EXISTS exspense_categories;
+DROP TABLE IF EXISTS user_tags;
 DROP TABLE IF EXISTS app_users;

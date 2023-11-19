@@ -4,11 +4,12 @@ use sqlx::Postgres;
 
 use crate::domain::AppUser;
 
-pub struct AppUserRepository<'a> {
-    pub pool: &'a Pool<Postgres>,
+#[derive(Clone)]
+pub struct AppUserRepository {
+    pub pool: Pool<Postgres>,
 }
 
-impl<'a> AppUserRepository<'a> {
+impl AppUserRepository {
     pub async fn get(&self, id: uuid::Uuid) -> Result<Option<AppUser>, Error> {
         let user = sqlx::query_as!(
             AppUser,
@@ -17,7 +18,7 @@ impl<'a> AppUserRepository<'a> {
             ",
             id
         )
-        .fetch_optional(self.pool)
+        .fetch_optional(&self.pool)
         .await?;
         Ok(user)
     }

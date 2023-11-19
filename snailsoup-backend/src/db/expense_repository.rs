@@ -4,11 +4,11 @@ use sqlx::Postgres;
 
 use crate::domain::Expense;
 
-pub struct ExpenseRepository<'a> {
-    pub pool: &'a Pool<Postgres>,
+pub struct ExpenseRepository {
+    pub pool: Pool<Postgres>,
 }
 
-impl<'a> ExpenseRepository<'a> {
+impl ExpenseRepository {
     pub async fn get(&self, id: uuid::Uuid) -> Result<Option<Expense>, Error> {
         let user = sqlx::query_as!(
             Expense,
@@ -17,7 +17,7 @@ impl<'a> ExpenseRepository<'a> {
             ",
             id
         )
-        .fetch_optional(self.pool)
+        .fetch_optional(&self.pool)
         .await?;
         Ok(user)
     }

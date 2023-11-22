@@ -10,14 +10,14 @@ impl ExpenseService {
     pub async fn get(&self, id: uuid::Uuid) -> Option<Expense> {
         match self.expense_repository.get(id).await {
             Ok(expense) => expense,
-            Err(_) => None
+            Err(_) => None,
         }
     }
 
     pub async fn get_all(&self) -> Vec<Expense> {
         match self.expense_repository.get_all().await {
             Ok(expenses) => expenses,
-            Err(_) => Vec::new()
+            Err(_) => Vec::new(),
         }
     }
 }

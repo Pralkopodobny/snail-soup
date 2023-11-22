@@ -31,7 +31,12 @@ pub async fn expense_by_id(
     )
 )]
 pub async fn all_expenses(db: Arc<ExpenseService>) -> Result<impl warp::Reply, Infallible> {
-    let expenses : Vec<ExpenseResponse> = db.get_all().await.into_iter().map(|e| ExpenseResponse::from_expense(e)).collect();
+    let expenses: Vec<ExpenseResponse> = db
+        .get_all()
+        .await
+        .into_iter()
+        .map(|e| ExpenseResponse::from_expense(e))
+        .collect();
 
     Ok(warp::reply::json(&expenses))
 }

@@ -1,15 +1,15 @@
 use sqlx::postgres::PgPoolOptions;
 mod db;
 mod domain;
-mod services;
 mod features;
+mod services;
 
 use services::expense::ExpenseService;
 
 use std::sync::Arc;
 
 use utoipa::{
-    openapi::security::{SecurityScheme, Http, HttpAuthScheme},
+    openapi::security::{Http, HttpAuthScheme, SecurityScheme},
     Modify, OpenApi,
 };
 use utoipa_swagger_ui::Config;
@@ -61,7 +61,7 @@ async fn main() -> Result<(), sqlx::Error> {
     print!("\n{}\n", date_message);
 
     let hello = warp::path!("hello" / String).map(|name| format!("Hello, {}!", name));
-    
+
     #[derive(OpenApi)]
     #[openapi(
             paths(features::expense::handlers::all_expenses),
@@ -74,9 +74,9 @@ async fn main() -> Result<(), sqlx::Error> {
             )
         )]
     struct ApiDoc;
-    
+
     struct SecurityAddon;
-    
+
     impl Modify for SecurityAddon {
         fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
             let components = openapi.components.as_mut().unwrap(); // we can unwrap safely since there already is components registered.
@@ -91,7 +91,7 @@ async fn main() -> Result<(), sqlx::Error> {
         .and(warp::get())
         .map(|| warp::reply::json(&ApiDoc::openapi()));
 
-        let config = Arc::new(Config::from("/api-doc.json"));
+    let config = Arc::new(Config::from("/api-doc.json"));
 
     let swagger_ui = warp::path("swagger-ui")
         .and(warp::get())
@@ -99,17 +99,18 @@ async fn main() -> Result<(), sqlx::Error> {
         .and(warp::path::tail())
         .and(warp::any().map(move || config.clone()))
         .and_then(serve_swagger);
-    
 
-
-
-    warp::serve(api_doc.or(swagger_ui).or(hello).or(features::all_filters(expense_service.clone())))
-        .run(([127, 0, 0, 1], 3030))
-        .await;
+    warp::serve(
+        api_doc
+            .or(swagger_ui)
+            .or(hello)
+            .or(features::all_filters(expense_service.clone())),
+    )
+    .run(([127, 0, 0, 1], 3030))
+    .await;
 
     Ok(())
 }
-
 
 async fn serve_swagger(
     full_path: FullPath,

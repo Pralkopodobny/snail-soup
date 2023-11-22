@@ -22,13 +22,15 @@ impl ExpenseRepository {
         Ok(user)
     }
 
-    pub async fn get_all(&self) -> Result<Vec<Expense>, Error>{
+    pub async fn get_all(&self) -> Result<Vec<Expense>, Error> {
         let users = sqlx::query_as!(
             Expense,
             "
             SELECT * FROM expenses
             "
-        ).fetch_all(&self.pool).await?;
+        )
+        .fetch_all(&self.pool)
+        .await?;
         Ok(users)
     }
 }

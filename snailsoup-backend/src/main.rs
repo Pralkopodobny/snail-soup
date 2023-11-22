@@ -6,10 +6,10 @@ mod features;
 
 use services::expense::ExpenseService;
 
-use std::{net::Ipv4Addr, sync::Arc};
+use std::sync::Arc;
 
 use utoipa::{
-    openapi::security::{ApiKey, ApiKeyValue, SecurityScheme, Http, HttpAuthScheme},
+    openapi::security::{SecurityScheme, Http, HttpAuthScheme},
     Modify, OpenApi,
 };
 use utoipa_swagger_ui::Config;

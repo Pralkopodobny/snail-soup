@@ -4,11 +4,21 @@ mod domain;
 mod services;
 mod features;
 
-use warp::Filter;
-
-
 use services::expense::ExpenseService;
-use std::sync::Arc;
+
+use std::{net::Ipv4Addr, sync::Arc};
+
+use utoipa::{
+    openapi::security::{ApiKey, ApiKeyValue, SecurityScheme, Http, HttpAuthScheme},
+    Modify, OpenApi,
+};
+use utoipa_swagger_ui::Config;
+use warp::{
+    http::Uri,
+    hyper::{Response, StatusCode},
+    path::{FullPath, Tail},
+    Filter, Rejection, Reply,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), sqlx::Error> {
@@ -51,10 +61,84 @@ async fn main() -> Result<(), sqlx::Error> {
     print!("\n{}\n", date_message);
 
     let hello = warp::path!("hello" / String).map(|name| format!("Hello, {}!", name));
+    
+    #[derive(OpenApi)]
+    #[openapi(
+            paths(features::expense::handlers::all_expenses),
+            components(
+                schemas(features::expense::handlers::ExpenseResponse)
+            ),
+            modifiers(&SecurityAddon),
+            tags(
+                (name = "Expenses", description = "Expense CRUD")
+            )
+        )]
+    struct ApiDoc;
+    
+    struct SecurityAddon;
+    
+    impl Modify for SecurityAddon {
+        fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+            let components = openapi.components.as_mut().unwrap(); // we can unwrap safely since there already is components registered.
+            components.add_security_scheme(
+                "api_key",
+                SecurityScheme::Http(Http::new(HttpAuthScheme::Bearer)),
+            )
+        }
+    }
 
-    warp::serve(hello.or(features::all_filters(expense_service.clone())))
+    let api_doc = warp::path("api-doc.json")
+        .and(warp::get())
+        .map(|| warp::reply::json(&ApiDoc::openapi()));
+
+        let config = Arc::new(Config::from("/api-doc.json"));
+
+    let swagger_ui = warp::path("swagger-ui")
+        .and(warp::get())
+        .and(warp::path::full())
+        .and(warp::path::tail())
+        .and(warp::any().map(move || config.clone()))
+        .and_then(serve_swagger);
+    
+
+
+
+    warp::serve(api_doc.or(swagger_ui).or(hello).or(features::all_filters(expense_service.clone())))
         .run(([127, 0, 0, 1], 3030))
         .await;
 
     Ok(())
+}
+
+
+async fn serve_swagger(
+    full_path: FullPath,
+    tail: Tail,
+    config: Arc<Config<'static>>,
+) -> Result<Box<dyn Reply + 'static>, Rejection> {
+    if full_path.as_str() == "/swagger-ui" {
+        return Ok(Box::new(warp::redirect::found(Uri::from_static(
+            "/swagger-ui/",
+        ))));
+    }
+
+    let path = tail.as_str();
+    match utoipa_swagger_ui::serve(path, config) {
+        Ok(file) => {
+            if let Some(file) = file {
+                Ok(Box::new(
+                    Response::builder()
+                        .header("Content-Type", file.content_type)
+                        .body(file.bytes),
+                ))
+            } else {
+                Ok(Box::new(StatusCode::NOT_FOUND))
+            }
+        }
+        Err(error) => Ok(Box::new(
+            Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .body(error.to_string()),
+        )),
+    }
 }

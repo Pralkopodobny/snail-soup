@@ -1,4 +1,4 @@
-mod expense;
+pub mod expense;
 
 use crate::ExpenseService;
 
@@ -11,3 +11,5 @@ pub fn all_filters(
 ) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
     expense::expense_filters(expense_service)
 }
+
+pub use expense::all_expenses;

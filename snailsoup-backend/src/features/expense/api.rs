@@ -28,7 +28,7 @@ fn all_expenses(
 }
 
 fn with_service(
-    db: Arc<ExpenseService>,
+    service: Arc<ExpenseService>,
 ) -> impl Filter<Extract = (Arc<ExpenseService>,), Error = std::convert::Infallible> + Clone {
-    warp::any().map(move || db.clone())
+    warp::any().map(move || service.clone())
 }

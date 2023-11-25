@@ -27,11 +27,9 @@ async fn main() -> Result<(), sqlx::Error> {
         .connect("postgres://postgres:password@localhost/snailsoup")
         .await?;
 
-    let app_user_repo = db::AppUserRepository { pool: pool.clone() };
-    let expense_repository = Arc::new(db::ExpenseRepository { pool: pool.clone() });
-    let expense_service = Arc::new(ExpenseService {
-        expense_repository: expense_repository.clone(),
-    });
+    let app_user_repo = db::AppUserRepository::new(pool.clone());
+    let expense_repository = Arc::new(db::ExpenseRepository::new(pool.clone()));
+    let expense_service = Arc::new(ExpenseService::new(expense_repository.clone()));
 
     let expense = expense_repository
         .get(uuid::Uuid::parse_str("5fe66f3f-a5a6-417e-957a-96508cd14736").unwrap())

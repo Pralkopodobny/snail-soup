@@ -6,10 +6,14 @@ use crate::domain::AppUser;
 
 #[derive(Clone)]
 pub struct AppUserRepository {
-    pub pool: Pool<Postgres>,
+    pool: Pool<Postgres>,
 }
 
 impl AppUserRepository {
+    pub fn new(pool: Pool<Postgres>) -> AppUserRepository {
+        AppUserRepository { pool: pool }
+    }
+
     pub async fn get(&self, id: uuid::Uuid) -> Result<Option<AppUser>, Error> {
         let user = sqlx::query_as!(
             AppUser,

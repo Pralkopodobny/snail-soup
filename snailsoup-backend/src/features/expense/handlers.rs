@@ -5,21 +5,33 @@ use std::sync::Arc;
 use utoipa::ToSchema;
 use warp::hyper::StatusCode;
 
+use warp::reply;
+
+#[utoipa::path(
+    get,
+    path = "/api/admin/expenses/{id}",
+    tag = "Expenses",
+    responses(
+        (status = 200, description = "Expense found succesfully", body = ExpenseResponse),
+        (status = NOT_FOUND, description = "Expense not found")
+    ),
+    params(
+        ("id" = Uuid, Path, description = "Expense database id to get Expense for"),
+    )
+)]
 pub async fn expense_by_id(
-    id: String,
+    id: uuid::Uuid,
     service: Arc<ExpenseService>,
 ) -> Result<Box<dyn warp::Reply>, Infallible> {
-    let parsed_id = match uuid::Uuid::parse_str(id.as_str()) {
-        Ok(id) => id,
-        Err(_) => return Ok(Box::new(StatusCode::BAD_REQUEST)),
-    };
+    let expense = service.get(id).await;
 
-    let expense = service.get(parsed_id).await;
-
-    Ok(Box::new(warp::reply::html(match expense {
-        None => "no expense with such id".to_string(),
-        Some(expense) => expense.cost.to_string(),
-    })))
+    match expense {
+        Some(e) => Ok(Box::new(reply::json(&ExpenseResponse::from_expense(e)))),
+        None => Ok(Box::new(reply::with_status(
+            "Expense not found",
+            StatusCode::NOT_FOUND,
+        ))),
+    }
 }
 
 #[utoipa::path(

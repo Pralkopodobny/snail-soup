@@ -26,4 +26,16 @@ impl AppUserRepository {
         .await?;
         Ok(user)
     }
+
+    pub async fn get_all(&self) -> Result<Vec<AppUser>, Error> {
+        let users = sqlx::query_as!(
+            AppUser,
+            "
+            SELECT * FROM app_users
+            "
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(users)
+    }
 }

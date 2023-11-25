@@ -14,13 +14,17 @@ use warp::Filter;
 use crate::services::UserService;
 
 #[tokio::main]
-async fn main() -> Result<(), sqlx::Error> {
-    let pool = PgPoolOptions::new()
+async fn main() {
+    let pool = match PgPoolOptions::new()
         .max_connections(5)
         .connect("postgres://postgres:password@localhost/snailsoup")
-        .await?;
+        .await
+    {
+        Ok(p) => p,
+        Err(_) => panic!("Cannot connect to database!"),
+    };
 
-    println!("pool initialized");
+    println!("Connected to a database");
 
     let app_user_repo = Arc::new(db::AppUserRepository::new(pool.clone()));
     let expense_repository = Arc::new(db::ExpenseRepository::new(pool.clone()));
@@ -36,6 +40,4 @@ async fn main() -> Result<(), sqlx::Error> {
     )))
     .run(([127, 0, 0, 1], 3030))
     .await;
-
-    Ok(())
 }

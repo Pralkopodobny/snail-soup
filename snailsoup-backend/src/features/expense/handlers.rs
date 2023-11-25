@@ -7,14 +7,14 @@ use warp::hyper::StatusCode;
 
 pub async fn expense_by_id(
     id: String,
-    db: Arc<ExpenseService>,
+    service: Arc<ExpenseService>,
 ) -> Result<Box<dyn warp::Reply>, Infallible> {
     let parsed_id = match uuid::Uuid::parse_str(id.as_str()) {
         Ok(id) => id,
         Err(_) => return Ok(Box::new(StatusCode::BAD_REQUEST)),
     };
 
-    let expense = db.get(parsed_id).await;
+    let expense = service.get(parsed_id).await;
 
     Ok(Box::new(warp::reply::html(match expense {
         None => "no expense with such id".to_string(),
@@ -30,8 +30,8 @@ pub async fn expense_by_id(
         (status = 200, description = "list expenses successfully", body = [ExpenseResponse])
     )
 )]
-pub async fn all_expenses(db: Arc<ExpenseService>) -> Result<impl warp::Reply, Infallible> {
-    let expenses: Vec<ExpenseResponse> = db
+pub async fn all_expenses(service: Arc<ExpenseService>) -> Result<impl warp::Reply, Infallible> {
+    let expenses: Vec<ExpenseResponse> = service
         .get_all()
         .await
         .into_iter()

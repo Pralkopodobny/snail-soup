@@ -1,6 +1,7 @@
 use super::handlers;
 use crate::ExpenseService;
 use std::sync::Arc;
+use uuid::Uuid;
 use warp::Filter;
 
 pub fn expense_filters(
@@ -12,7 +13,7 @@ pub fn expense_filters(
 fn expense_by_id(
     service: Arc<ExpenseService>,
 ) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
-    warp::path!("api" / "admin" / "expenses" / String)
+    warp::path!("api" / "admin" / "expenses" / Uuid)
         .and(warp::get())
         .and(with_service(service))
         .and_then(handlers::expense_by_id)

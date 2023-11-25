@@ -8,9 +8,11 @@ pub struct ExpenseService {
 
 impl ExpenseService {
     pub fn new(expense_repository: Arc<ExpenseRepository>) -> ExpenseService {
-        ExpenseService {expense_repository: expense_repository}
+        ExpenseService {
+            expense_repository: expense_repository,
+        }
     }
-    
+
     pub async fn get(&self, id: uuid::Uuid) -> Option<Expense> {
         match self.expense_repository.get(id).await {
             Ok(expense) => expense,

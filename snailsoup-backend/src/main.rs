@@ -5,11 +5,13 @@ mod features;
 mod openapi;
 mod services;
 
-use services::expense::ExpenseService;
+use services::ExpenseService;
 
 use std::sync::Arc;
 use utoipa_swagger_ui::Config;
 use warp::Filter;
+
+use crate::services::UserService;
 
 #[tokio::main]
 async fn main() -> Result<(), sqlx::Error> {
@@ -18,9 +20,10 @@ async fn main() -> Result<(), sqlx::Error> {
         .connect("postgres://postgres:password@localhost/snailsoup")
         .await?;
 
-    let app_user_repo = db::AppUserRepository::new(pool.clone());
+    let app_user_repo = Arc::new(db::AppUserRepository::new(pool.clone()));
     let expense_repository = Arc::new(db::ExpenseRepository::new(pool.clone()));
     let expense_service = Arc::new(ExpenseService::new(expense_repository.clone()));
+    let user_service = Arc::new(UserService::new(app_user_repo.clone()));
 
     let expense = expense_repository
         .get(uuid::Uuid::parse_str("5fe66f3f-a5a6-417e-957a-96508cd14736").unwrap())
@@ -56,7 +59,10 @@ async fn main() -> Result<(), sqlx::Error> {
     warp::serve(
         openapi::openapi_filters(config)
             .or(hello)
-            .or(features::all_filters(expense_service.clone())),
+            .or(features::all_filters(
+                expense_service.clone(),
+                user_service.clone(),
+            )),
     )
     .run(([127, 0, 0, 1], 3030))
     .await;

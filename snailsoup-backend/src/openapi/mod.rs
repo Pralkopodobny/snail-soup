@@ -15,8 +15,6 @@ use warp::{
 pub use api_doc::ApiDoc;
 pub use security::SecurityAddon;
 
-const SWAGGER_UI_PATH: &str = "/swagger-ui";
-
 pub fn openapi_filters(
     config: Arc<Config<'static>>,
 ) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
@@ -45,9 +43,9 @@ async fn swagger_handler(
     tail: Tail,
     config: Arc<Config<'static>>,
 ) -> Result<Box<dyn Reply + 'static>, Rejection> {
-    if full_path.as_str() == SWAGGER_UI_PATH {
+    if full_path.as_str() == "/swagger-ui" {
         return Ok(Box::new(warp::redirect::found(Uri::from_static(
-            SWAGGER_UI_PATH,
+            "/swagger-ui/",
         ))));
     }
 

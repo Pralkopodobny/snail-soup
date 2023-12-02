@@ -23,5 +23,5 @@ sqlx = { version = "0.7.2", features = [
 warp = {version = "0.3.6"}
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0"}
-utoipa = { version = "4.0.1", features = ["uuid", "decimal_float", "chrono"] }
-utoipa-swagger-ui = { version = "4.0"}
+utoipa = { version = "4.1.0", features = ["uuid", "decimal_float", "chrono"] }
+utoipa-swagger-ui = { version = "5.0.0"}

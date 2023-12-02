@@ -1,17 +1,13 @@
-use sqlx::postgres::PgPoolOptions;
 mod db;
 mod domain;
 mod features;
-mod openapi;
 mod services;
 
-use services::ExpenseService;
-
 use std::sync::Arc;
-use utoipa_swagger_ui::Config;
-use warp::Filter;
 
-use crate::services::UserService;
+use sqlx::postgres::PgPoolOptions;
+
+use crate::services::{UserService, ExpenseService};
 
 #[tokio::main]
 async fn main() {
@@ -32,12 +28,8 @@ async fn main() {
     let expense_service = Arc::new(ExpenseService::new(expense_repository.clone()));
     let user_service = Arc::new(UserService::new(app_user_repo.clone()));
 
-    let config = Arc::new(Config::from("/api-doc.json"));
+    let app = features::get_routes(expense_service, user_service);
 
-    warp::serve(openapi::openapi_filters(config).or(features::all_filters(
-        expense_service.clone(),
-        user_service.clone(),
-    )))
-    .run(([127, 0, 0, 1], 3030))
-    .await;
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
 }

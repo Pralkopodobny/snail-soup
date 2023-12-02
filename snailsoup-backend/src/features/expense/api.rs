@@ -1,35 +1,41 @@
-use super::handlers;
-use crate::services::ExpenseService;
 use std::sync::Arc;
-use uuid::Uuid;
-use warp::Filter;
 
-pub fn expense_filters(
-    service: Arc<ExpenseService>,
-) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
-    expense_by_id(service.clone()).or(all_expenses(service.clone()))
+use axum::{routing::get, Router};
+use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
+
+use super::handlers::{all_expenses, expense_by_id};
+use crate::{domain, services::ExpenseService};
+
+pub fn get_routes(service: Arc<ExpenseService>) -> Router {
+    Router::new()
+        .route("/api/admin/expenses", get(all_expenses))
+        .route("/api/admin/expenses/:expense_id", get(expense_by_id))
+        .with_state(service)
 }
 
-fn expense_by_id(
-    service: Arc<ExpenseService>,
-) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
-    warp::path!("api" / "admin" / "expenses" / Uuid)
-        .and(warp::get())
-        .and(with_service(service))
-        .and_then(handlers::expense_by_id)
+#[derive(Serialize, Deserialize, ToSchema, Clone)]
+pub struct ExpenseResponse {
+    #[schema()]
+    pub id: uuid::Uuid,
+    #[schema()]
+    pub user_id: uuid::Uuid,
+    #[schema()]
+    pub description: Option<String>,
+    #[schema()]
+    pub expense_date: chrono::NaiveDate,
+    #[schema()]
+    pub cost: rust_decimal::Decimal,
 }
 
-fn all_expenses(
-    service: Arc<ExpenseService>,
-) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
-    warp::path!("api" / "admin" / "expenses")
-        .and(warp::get())
-        .and(with_service(service))
-        .and_then(handlers::all_expenses)
-}
-
-fn with_service(
-    service: Arc<ExpenseService>,
-) -> impl Filter<Extract = (Arc<ExpenseService>,), Error = std::convert::Infallible> + Clone {
-    warp::any().map(move || service.clone())
+impl ExpenseResponse {
+    pub fn from_expense(expense: domain::Expense) -> ExpenseResponse {
+        ExpenseResponse {
+            id: expense.id,
+            user_id: expense.user_id,
+            description: expense.description,
+            expense_date: expense.expense_date,
+            cost: expense.cost,
+        }
+    }
 }

@@ -1,35 +1,36 @@
-use super::handlers;
-use crate::services::UserService;
 use std::sync::Arc;
-use uuid::Uuid;
-use warp::Filter;
 
-pub fn user_filters(
-    service: Arc<UserService>,
-) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
-    user_by_id(service.clone()).or(all_users(service.clone()))
+use axum::{routing::get, Router};
+use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
+
+use crate::{domain, services::UserService};
+
+use super::handlers::{all_users, user_by_id};
+
+pub fn get_routes(service: Arc<UserService>) -> Router {
+    Router::new()
+        .route("/api/admin/users", get(all_users))
+        .route("/api/admin/users/:user_id", get(user_by_id))
+        .with_state(service)
 }
 
-fn user_by_id(
-    service: Arc<UserService>,
-) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
-    warp::path!("api" / "admin" / "users" / Uuid)
-        .and(warp::get())
-        .and(with_service(service))
-        .and_then(handlers::user_by_id)
+#[derive(Serialize, Deserialize, ToSchema, Clone)]
+pub struct UserResponse {
+    #[schema()]
+    pub id: uuid::Uuid,
+    #[schema()]
+    pub username: String,
+    #[schema()]
+    pub account_role: String,
 }
 
-fn all_users(
-    service: Arc<UserService>,
-) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
-    warp::path!("api" / "admin" / "users")
-        .and(warp::get())
-        .and(with_service(service))
-        .and_then(handlers::all_users)
-}
-
-fn with_service(
-    service: Arc<UserService>,
-) -> impl Filter<Extract = (Arc<UserService>,), Error = std::convert::Infallible> + Clone {
-    warp::any().map(move || service.clone())
+impl UserResponse {
+    pub fn from_user(user: domain::AppUser) -> UserResponse {
+        UserResponse {
+            id: user.id,
+            username: user.username,
+            account_role: user.account_role,
+        }
+    }
 }

@@ -1,15 +1,14 @@
 use std::sync::Arc;
 
-use axum::{
-    extract::{Path, State},
-    http::StatusCode,
-    response::IntoResponse,
-    Json,
-};
+use axum::{response::IntoResponse, http::StatusCode, Json, Router, extract::{Path, State}, routing::get};
+use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
-use crate::services::UserService;
+use crate::{services::UserService, domain};
 
-use super::api::UserResponse;
+pub fn get_routes(service: Arc<UserService>) -> Router {
+    Router::new().route("/api/admin/users", get(all_users)).route("/api/admin/users/:user_id", get(user_by_id)).with_state(service)
+}
 
 #[utoipa::path(
     get,
@@ -23,7 +22,7 @@ use super::api::UserResponse;
         ("id" = Uuid, Path, description = "User database id to get User for"),
     )
 )]
-pub(super) async fn user_by_id(
+pub async fn user_by_id(
     Path(user_id): Path<uuid::Uuid>,
     service: State<Arc<UserService>>,
 ) -> Result<impl IntoResponse, StatusCode> {
@@ -43,7 +42,7 @@ pub(super) async fn user_by_id(
         (status = 200, description = "list users successfully", body = [UserResponse])
     )
 )]
-pub(super) async fn all_users(service: State<Arc<UserService>>) -> impl IntoResponse {
+pub async fn all_users(service: State<Arc<UserService>>) -> impl IntoResponse {
     let users: Vec<UserResponse> = service
         .get_all()
         .await
@@ -52,4 +51,24 @@ pub(super) async fn all_users(service: State<Arc<UserService>>) -> impl IntoResp
         .collect();
 
     Json(users)
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Clone)]
+pub struct UserResponse {
+    #[schema()]
+    pub id: uuid::Uuid,
+    #[schema()]
+    pub username: String,
+    #[schema()]
+    pub account_role: String,
+}
+
+impl UserResponse {
+    pub fn from_user(user: domain::AppUser) -> UserResponse {
+        UserResponse {
+            id: user.id,
+            username: user.username,
+            account_role: user.account_role,
+        }
+    }
 }

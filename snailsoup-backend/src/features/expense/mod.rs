@@ -1,4 +1,2 @@
-mod api;
+pub mod api;
 pub mod handlers;
-
-pub use api::expense_filters;

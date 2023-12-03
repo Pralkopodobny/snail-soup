@@ -7,7 +7,8 @@ use std::sync::Arc;
 
 use sqlx::postgres::PgPoolOptions;
 
-use crate::services::{UserService, ExpenseService};
+use crate::services::auth::AuthService;
+use crate::services::{ExpenseService, UserService};
 
 #[tokio::main]
 async fn main() {
@@ -27,9 +28,16 @@ async fn main() {
 
     let expense_service = Arc::new(ExpenseService::new(expense_repository.clone()));
     let user_service = Arc::new(UserService::new(app_user_repo.clone()));
+    let auth_service = Arc::new(AuthService::new(app_user_repo.clone()));
 
-    let app = features::get_routes(expense_service, user_service);
+    let app = features::get_routes(expense_service.clone(), user_service.clone(), auth_service.clone());
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
+}
+
+#[derive(Debug, serde::Serialize)]
+pub struct ErrorResponse {
+    pub status: &'static str,
+    pub message: String,
 }

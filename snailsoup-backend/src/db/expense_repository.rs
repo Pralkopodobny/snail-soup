@@ -1,4 +1,3 @@
-use sqlx::Error;
 use sqlx::Pool;
 use sqlx::Postgres;
 
@@ -13,7 +12,7 @@ impl ExpenseRepository {
         ExpenseRepository { pool: pool }
     }
 
-    pub async fn get(&self, id: uuid::Uuid) -> Result<Option<Expense>, Error> {
+    pub async fn get(&self, id: uuid::Uuid) -> Result<Option<Expense>, sqlx::Error> {
         let user = sqlx::query_as!(
             Expense,
             "
@@ -26,7 +25,7 @@ impl ExpenseRepository {
         Ok(user)
     }
 
-    pub async fn get_all(&self) -> Result<Vec<Expense>, Error> {
+    pub async fn get_all(&self) -> Result<Vec<Expense>, sqlx::Error> {
         let users = sqlx::query_as!(
             Expense,
             "

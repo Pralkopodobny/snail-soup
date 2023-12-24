@@ -15,7 +15,7 @@ pub fn get_routes(service: Arc<UserService>) -> Router {
     path = "/api/admin/users/{id}",
     tag = "Users",
     responses(
-        (status = 200, description = "User found succesfully", body = UserResponse),
+        (status = 200, description = "User found successfully", body = UserResponse),
         (status = NOT_FOUND, description = "User not found")
     ),
     params(

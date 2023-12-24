@@ -15,7 +15,7 @@ use crate::services::ExpenseService;
     path = "/api/admin/expenses/{id}",
     tag = "Expenses",
     responses(
-        (status = 200, description = "Expense found succesfully", body = ExpenseResponse),
+        (status = 200, description = "Expense found successfully", body = ExpenseResponse),
         (status = NOT_FOUND, description = "Expense not found")
     ),
     params(

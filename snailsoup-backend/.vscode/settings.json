@@ -1,5 +1,14 @@
 {
     "rust-analyzer.linkedProjects": [
         "./Cargo.toml"
+    ],
+    "cSpell.words": [
+        "chrono",
+        "openapi",
+        "rapidoc",
+        "redoc",
+        "snailsoup",
+        "sqlx",
+        "utoipa"
     ]
 }

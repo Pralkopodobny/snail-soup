@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct AppUser {
     pub id: uuid::Uuid,
     pub username: String,

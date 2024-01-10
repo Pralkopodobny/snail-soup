@@ -32,7 +32,7 @@ pub(super) async fn login(
             LoginError::InternalPasswordError => {
                 println!("xd");
                 Err(StatusCode::INTERNAL_SERVER_ERROR)
-            },
+            }
         },
     }
 }

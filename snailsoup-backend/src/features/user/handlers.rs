@@ -4,10 +4,10 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
-    Json,
+    Extension, Json,
 };
 
-use crate::services::UserService;
+use crate::{domain::AppUser, services::UserService};
 
 use super::api::UserResponse;
 
@@ -52,4 +52,17 @@ pub(super) async fn all_users(service: State<Arc<UserService>>) -> impl IntoResp
         .collect();
 
     Json(users)
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/admin/users/me",
+    tag = "Users",
+    responses(
+        (status = 200, description = "list users successfully", body = UserResponse)
+    ),
+    security(("Bearer token" = []))
+)]
+pub(super) async fn me(Extension(user): Extension<AppUser>) -> impl IntoResponse {
+    Json(UserResponse::from_user(user))
 }

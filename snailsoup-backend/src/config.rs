@@ -17,8 +17,8 @@ impl Config {
             jwt_expires_in,
             jwt_maxage: match jwt_maxage.parse::<u32>() {
                 Err(_) => panic!("JWT_MAXAGE must be an integer value"),
-                Ok(val) => val
-            }
+                Ok(val) => val,
+            },
         }
     }
 }

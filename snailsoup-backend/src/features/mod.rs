@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::services::{auth::AuthService, ExpenseService, UserService};
-use axum::http::HeaderMap;
+use axum::http::{HeaderMap, header};
 use axum::Router;
 
 mod auth;
@@ -39,7 +39,7 @@ pub async fn authorize(
     next: axum::middleware::Next,
 ) -> Result<impl axum::response::IntoResponse, (axum::http::StatusCode, axum::Json<ErrorResponse>)>
 {
-    if !headers.contains_key("authorization") {
+    if !headers.contains_key(header::AUTHORIZATION) {
         let json_error = ErrorResponse {
             message: "Missing authorization token".to_string(),
         };

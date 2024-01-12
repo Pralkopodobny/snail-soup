@@ -24,11 +24,12 @@ pub(super) async fn login(
         .login(body.username.as_str(), body.password.as_str())
         .await
     {
-        Ok(claims) => Ok(Json(claims)),
+        Ok(token) => Ok(Json(token)),
         Err(e) => match e {
             LoginError::IncorrectUser => Err(StatusCode::UNAUTHORIZED),
             LoginError::IncorrectPassword => Err(StatusCode::UNAUTHORIZED),
             LoginError::InternalError => Err(StatusCode::INTERNAL_SERVER_ERROR),
+            LoginError::UnexpectedError => Err(StatusCode::INTERNAL_SERVER_ERROR),
             LoginError::InternalPasswordError => {
                 println!("xd");
                 Err(StatusCode::INTERNAL_SERVER_ERROR)

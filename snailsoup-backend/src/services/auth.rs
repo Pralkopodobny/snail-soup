@@ -1,8 +1,11 @@
 mod token_claim;
 
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
+use chrono::{DateTime, Duration, Utc};
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
+use uuid::Uuid;
 
-use crate::db::AppUserRepository;
+use crate::{db::AppUserRepository, domain::AppUser};
 use std::sync::Arc;
 
 pub use self::token_claim::TokenClaims;
@@ -16,16 +19,22 @@ pub enum LoginError {
     IncorrectPassword,
     InternalError,
     InternalPasswordError,
+    UnexpectedError,
+}
+
+pub enum AuthError {
+    InvalidToken,
+    ExpiredToken,
+    UserDoesNotExist,
+    InternalError,
 }
 
 impl AuthService {
-    pub fn new(expense_repository: Arc<AppUserRepository>) -> AuthService {
-        AuthService {
-            user_repository: expense_repository,
-        }
+    pub fn new(user_repository: Arc<AppUserRepository>) -> AuthService {
+        AuthService { user_repository }
     }
 
-    pub async fn login(&self, username: &str, password: &str) -> Result<TokenClaims, LoginError> {
+    pub async fn login(&self, username: &str, password: &str) -> Result<String, LoginError> {
         let user_opt = match self.user_repository.get_by_name(username).await {
             Ok(user) => user,
             Err(_) => Err(LoginError::InternalError)?,
@@ -50,12 +59,52 @@ impl AuthService {
             return Err(LoginError::IncorrectPassword);
         }
 
-        let now = chrono::Utc::now();
-        //TODO: encode using secret and use time from .env file
-        Ok(TokenClaims {
+        let now = Utc::now();
+
+        let claims = TokenClaims {
             id: user.id.to_string(),
-            created_at: now.timestamp() as usize,
-            exp: (now + chrono::Duration::minutes(60)).timestamp() as usize,
-        })
+            created_at: now.timestamp(),
+            exp: (now + Duration::minutes(60)).timestamp(), //TODO: use time from .env file
+        };
+
+        let token = encode(
+            &Header::default(),
+            &claims,
+            &EncodingKey::from_secret("TOP SECRET".as_ref()), //TODO: use secret from .env file
+        )
+        .map_err(|_| LoginError::UnexpectedError)?;
+
+        Ok(token)
+    }
+
+    pub async fn auth_bearer_token(&self, token: &str) -> Result<AppUser, AuthError> {
+        let claims = decode::<TokenClaims>(
+            &token,
+            &DecodingKey::from_secret("TOP SECRET".as_ref()), //TODO: use secret from .env file
+            &Validation::default(),
+        )
+        .map_err(|_| AuthError::InvalidToken)?;
+
+        let user_id = Uuid::parse_str(&claims.claims.id).map_err(|_| AuthError::InvalidToken)?;
+
+        let now = Utc::now();
+        let expire_date = match DateTime::<Utc>::from_timestamp(claims.claims.exp, 0) {
+            Some(t) => t,
+            None => Err(AuthError::InvalidToken)?,
+        };
+
+        if expire_date < now {
+            return Err(AuthError::ExpiredToken);
+        }
+
+        let user = self
+            .user_repository
+            .get(user_id)
+            .await
+            .map_err(|_| AuthError::InternalError)?;
+        match user {
+            Some(user) => Ok(user),
+            None => Err(AuthError::UserDoesNotExist),
+        }
     }
 }

@@ -21,7 +21,8 @@ use super::api::UserResponse;
     ),
     params(
         ("id" = Uuid, Path, description = "User database id to get User for"),
-    )
+    ),
+    security(("Bearer token" = []))
 )]
 pub(super) async fn user_by_id(
     Path(user_id): Path<uuid::Uuid>,
@@ -41,7 +42,8 @@ pub(super) async fn user_by_id(
     tag = "Users",
     responses(
         (status = 200, description = "list users successfully", body = [UserResponse])
-    )
+    ),
+    security(("Bearer token" = []))
 )]
 pub(super) async fn all_users(service: State<Arc<UserService>>) -> impl IntoResponse {
     let users: Vec<UserResponse> = service
@@ -56,10 +58,10 @@ pub(super) async fn all_users(service: State<Arc<UserService>>) -> impl IntoResp
 
 #[utoipa::path(
     get,
-    path = "/api/admin/users/me",
+    path = "/api/users/me",
     tag = "Users",
     responses(
-        (status = 200, description = "list users successfully", body = UserResponse)
+        (status = 200, description = "User found successfully", body = UserResponse),
     ),
     security(("Bearer token" = []))
 )]

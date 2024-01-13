@@ -20,7 +20,8 @@ use crate::services::ExpenseService;
     ),
     params(
         ("id" = Uuid, Path, description = "Expense database id to get Expense for"),
-    )
+    ),
+    security(("Bearer token" = []))
 )]
 pub(super) async fn expense_by_id(
     Path(expense_id): Path<uuid::Uuid>,
@@ -40,7 +41,8 @@ pub(super) async fn expense_by_id(
     tag = "Expenses",
     responses(
         (status = 200, description = "list expenses successfully", body = [ExpenseResponse])
-    )
+    ),
+    security(("Bearer token" = []))
 )]
 pub(super) async fn all_expenses(service: State<Arc<ExpenseService>>) -> impl IntoResponse {
     let expenses: Vec<ExpenseResponse> = service

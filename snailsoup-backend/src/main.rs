@@ -1,3 +1,4 @@
+mod app_state;
 mod config;
 mod db;
 mod domain;
@@ -9,6 +10,7 @@ use std::sync::Arc;
 use dotenv::dotenv;
 use sqlx::postgres::PgPoolOptions;
 
+use crate::app_state::AppState;
 use crate::config::Config;
 use crate::services::auth::AuthService;
 use crate::services::{ExpenseService, UserService};
@@ -40,11 +42,14 @@ async fn main() {
     let user_service = Arc::new(UserService::new(app_user_repo.clone()));
     let auth_service = Arc::new(AuthService::new(app_user_repo.clone()));
 
-    let app = features::get_routes(
-        expense_service.clone(),
-        user_service.clone(),
+    let app_state = AppState::new(
+        config,
         auth_service.clone(),
+        user_service.clone(),
+        expense_service.clone(),
     );
+
+    let app = features::get_routes(app_state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();

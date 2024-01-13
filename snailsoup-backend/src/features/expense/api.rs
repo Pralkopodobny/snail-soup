@@ -1,18 +1,16 @@
-use std::sync::Arc;
-
 use axum::{routing::get, Router};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use super::handlers::{all_expenses, expense_by_id};
-use crate::{domain, services::ExpenseService};
+use crate::{app_state::AppState, domain};
 
 //TODO: secure them
-pub fn get_admin_routes(service: Arc<ExpenseService>) -> Router {
+pub fn get_admin_routes(app_state: AppState) -> Router {
     Router::new()
         .route("/api/admin/expenses", get(all_expenses))
         .route("/api/admin/expenses/:expense_id", get(expense_by_id))
-        .with_state(service)
+        .with_state(app_state)
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone)]

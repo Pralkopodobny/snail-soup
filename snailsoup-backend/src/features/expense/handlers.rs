@@ -7,7 +7,7 @@ use axum::{
     Json,
 };
 
-use super::api::ExpenseResponse;
+use super::api::{ExpenseResponse, FullExpenseResponse};
 use crate::services::ExpenseService;
 
 #[utoipa::path(
@@ -15,7 +15,7 @@ use crate::services::ExpenseService;
     path = "/api/admin/expenses/{id}",
     tag = "Expenses",
     responses(
-        (status = 200, description = "Expense found successfully", body = ExpenseResponse),
+        (status = 200, description = "Expense found successfully", body = FullExpenseResponse),
         (status = NOT_FOUND, description = "Expense not found")
     ),
     params(
@@ -30,7 +30,7 @@ pub(super) async fn expense_by_id(
     let expense = service.get(expense_id).await;
 
     match expense {
-        Some(e) => Ok(Json(ExpenseResponse::from_expense(e))),
+        Some(e) => Ok(Json(FullExpenseResponse::from_expense(e))),
         None => Err(StatusCode::NOT_FOUND),
     }
 }

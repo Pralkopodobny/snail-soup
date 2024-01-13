@@ -27,7 +27,13 @@ pub fn get_routes() -> Router {
 #[openapi(
             paths(all_expenses, expense_by_id, all_users, user_by_id, login, me),
             components(
-                schemas(super::expense::api::ExpenseResponse, super::user::api::UserResponse, super::auth::api::LoginRequest)
+                schemas(
+                    super::expense::api::ExpenseResponse,
+                    super::expense::api::FullExpenseResponse,
+                    super::expense::api::CategoryResponse,
+                    super::expense::api::TagResponse,
+                    super::user::api::UserResponse,
+                    super::auth::api::LoginRequest)
             ),
             modifiers(&SecurityAddon),
             tags(

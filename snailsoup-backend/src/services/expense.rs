@@ -1,5 +1,5 @@
 use crate::db::ExpenseRepository;
-use crate::domain::Expense;
+use crate::domain::{Expense, FullExpense};
 use std::sync::Arc;
 
 pub struct ExpenseService {
@@ -13,7 +13,7 @@ impl ExpenseService {
         }
     }
 
-    pub async fn get(&self, id: uuid::Uuid) -> Option<Expense> {
+    pub async fn get(&self, id: uuid::Uuid) -> Option<FullExpense> {
         match self.expense_repository.get(id).await {
             Ok(expense) => expense,
             Err(_) => None,

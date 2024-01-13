@@ -1,17 +1,15 @@
-use std::sync::Arc;
-
 use axum::{routing::post, Router};
 use serde::Deserialize;
 use utoipa::ToSchema;
 
-use crate::services::auth::AuthService;
+use crate::app_state::AppState;
 
 use super::handlers::login;
 
-pub fn get_public_routes(service: Arc<AuthService>) -> Router {
+pub fn get_public_routes(app_state: AppState) -> Router {
     Router::new()
         .route("/api/auth/login", post(login))
-        .with_state(service)
+        .with_state(app_state)
 }
 
 #[derive(Debug, Deserialize, ToSchema)]

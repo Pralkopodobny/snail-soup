@@ -1,6 +1,4 @@
-use std::sync::Arc;
-
-use crate::services::{auth::AuthService, ExpenseService, UserService};
+use crate::app_state::AppState;
 use axum::Router;
 
 mod auth;
@@ -8,21 +6,17 @@ mod expense;
 mod swagger;
 mod user;
 
-pub fn get_routes(
-    expense_service: Arc<ExpenseService>,
-    user_service: Arc<UserService>,
-    auth_service: Arc<AuthService>,
-) -> Router {
-    let public_routes = auth::api::get_public_routes(auth_service.clone());
+pub fn get_routes(app_state: AppState) -> Router {
+    let public_routes = auth::api::get_public_routes(app_state.clone());
 
-    let private_routes = user::api::get_private_routes(user_service.clone()).route_layer(
-        axum::middleware::from_fn_with_state(auth_service.clone(), auth::middleware::authorize),
+    let private_routes = user::api::get_private_routes(app_state.clone()).route_layer(
+        axum::middleware::from_fn_with_state(app_state.clone(), auth::middleware::authorize),
     );
 
-    let admin_routes = user::api::get_admin_routes(user_service.clone())
-        .merge(expense::api::get_admin_routes(expense_service.clone()))
+    let admin_routes = user::api::get_admin_routes(app_state.clone())
+        .merge(expense::api::get_admin_routes(app_state.clone()))
         .route_layer(axum::middleware::from_fn_with_state(
-            auth_service.clone(),
+            app_state.clone(),
             auth::middleware::authorize_admin,
         ));
 

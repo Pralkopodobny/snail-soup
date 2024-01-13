@@ -1,24 +1,22 @@
-use std::sync::Arc;
-
 use axum::{routing::get, Router};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::{domain, services::UserService};
+use crate::{app_state::AppState, domain};
 
 use super::handlers::{all_users, me, user_by_id};
 
-pub fn get_admin_routes(service: Arc<UserService>) -> Router {
+pub fn get_admin_routes(app_state: AppState) -> Router {
     Router::new()
         .route("/api/admin/users", get(all_users))
         .route("/api/admin/users/:user_id", get(user_by_id))
-        .with_state(service)
+        .with_state(app_state)
 }
 
-pub fn get_private_routes(service: Arc<UserService>) -> Router {
+pub fn get_private_routes(app_state: AppState) -> Router {
     Router::new()
         .route("/api/users/me", get(me))
-        .with_state(service)
+        .with_state(app_state)
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone)]

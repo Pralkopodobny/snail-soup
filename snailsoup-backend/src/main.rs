@@ -32,21 +32,17 @@ async fn main() {
     let config = Config::init();
     println!(
         "config read! JWT_MAXAGE:{}, JWT_EXPIRED_IN:{}",
-        config.jwt_maxage, config.jwt_maxage
+        config.jwt_maxage, config.jwt_expires_in
     );
 
     let app_user_repo = Arc::new(db::AppUserRepository::new(pool.clone()));
     let expense_repository = Arc::new(db::ExpenseRepository::new(pool.clone()));
 
-    let expense_service = Arc::new(ExpenseService::new(expense_repository.clone()));
-    let user_service = Arc::new(UserService::new(app_user_repo.clone()));
-    let auth_service = Arc::new(AuthService::new(app_user_repo.clone()));
-
     let app_state = AppState::new(
-        config,
-        auth_service.clone(),
-        user_service.clone(),
-        expense_service.clone(),
+        config.clone(),
+        Arc::new(AuthService::new(app_user_repo.clone(), config.clone())),
+        Arc::new(UserService::new(app_user_repo.clone())),
+        Arc::new(ExpenseService::new(expense_repository.clone())),
     );
 
     let app = features::get_routes(app_state);

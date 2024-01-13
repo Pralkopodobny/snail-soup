@@ -5,13 +5,14 @@ use chrono::{DateTime, Duration, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use uuid::Uuid;
 
-use crate::{db::AppUserRepository, domain::AppUser};
+use crate::{config::Config, db::AppUserRepository, domain::AppUser};
 use std::sync::Arc;
 
 pub use self::token_claim::TokenClaims;
 
 pub struct AuthService {
     user_repository: Arc<AppUserRepository>,
+    config: Config,
 }
 
 pub enum LoginError {
@@ -30,8 +31,11 @@ pub enum AuthError {
 }
 
 impl AuthService {
-    pub fn new(user_repository: Arc<AppUserRepository>) -> AuthService {
-        AuthService { user_repository }
+    pub fn new(user_repository: Arc<AppUserRepository>, config: Config) -> AuthService {
+        AuthService {
+            user_repository,
+            config,
+        }
     }
 
     pub async fn login(&self, username: &str, password: &str) -> Result<String, LoginError> {
@@ -64,13 +68,13 @@ impl AuthService {
         let claims = TokenClaims {
             id: user.id.to_string(),
             created_at: now.timestamp(),
-            exp: (now + Duration::minutes(60)).timestamp(), //TODO: use time from .env file
+            exp: (now + Duration::minutes(self.config.jwt_maxage.into())).timestamp(),
         };
 
         let token = encode(
             &Header::default(),
             &claims,
-            &EncodingKey::from_secret("TOP SECRET".as_ref()), //TODO: use secret from .env file
+            &EncodingKey::from_secret(self.config.jwt_secret.as_ref()),
         )
         .map_err(|_| LoginError::UnexpectedError)?;
 
@@ -80,7 +84,7 @@ impl AuthService {
     pub async fn auth_bearer_token(&self, token: &str) -> Result<AppUser, AuthError> {
         let claims = decode::<TokenClaims>(
             &token,
-            &DecodingKey::from_secret("TOP SECRET".as_ref()), //TODO: use secret from .env file
+            &DecodingKey::from_secret(self.config.jwt_secret.as_ref()),
             &Validation::default(),
         )
         .map_err(|_| AuthError::InvalidToken)?;

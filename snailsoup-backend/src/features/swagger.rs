@@ -11,7 +11,10 @@ use crate::features::expense::handlers::__path_all_expenses;
 use crate::features::expense::handlers::__path_expense_by_id;
 
 use crate::features::user::handlers::__path_all_users;
+use crate::features::user::handlers::__path_me;
 use crate::features::user::handlers::__path_user_by_id;
+
+use crate::features::auth::handlers::__path_login;
 
 pub fn get_routes() -> Router {
     Router::new()
@@ -22,9 +25,9 @@ pub fn get_routes() -> Router {
 
 #[derive(OpenApi)]
 #[openapi(
-            paths(all_expenses, expense_by_id, all_users, user_by_id),
+            paths(all_expenses, expense_by_id, all_users, user_by_id, login, me),
             components(
-                schemas(super::expense::api::ExpenseResponse, super::user::api::UserResponse)
+                schemas(super::expense::api::ExpenseResponse, super::user::api::UserResponse, super::auth::api::LoginRequest)
             ),
             modifiers(&SecurityAddon),
             tags(

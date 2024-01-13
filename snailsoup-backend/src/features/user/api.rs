@@ -6,12 +6,18 @@ use utoipa::ToSchema;
 
 use crate::{domain, services::UserService};
 
-use super::handlers::{all_users, user_by_id};
+use super::handlers::{all_users, me, user_by_id};
 
-pub fn get_routes(service: Arc<UserService>) -> Router {
+pub fn get_admin_routes(service: Arc<UserService>) -> Router {
     Router::new()
         .route("/api/admin/users", get(all_users))
         .route("/api/admin/users/:user_id", get(user_by_id))
+        .with_state(service)
+}
+
+pub fn get_private_routes(service: Arc<UserService>) -> Router {
+    Router::new()
+        .route("/api/users/me", get(me))
         .with_state(service)
 }
 

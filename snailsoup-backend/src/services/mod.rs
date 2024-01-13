@@ -1,3 +1,4 @@
+pub mod auth;
 mod expense;
 mod user;
 pub use expense::ExpenseService;

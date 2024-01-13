@@ -7,7 +7,8 @@ use utoipa::ToSchema;
 use super::handlers::{all_expenses, expense_by_id};
 use crate::{domain, services::ExpenseService};
 
-pub fn get_routes(service: Arc<ExpenseService>) -> Router {
+//TODO: secure them
+pub fn get_admin_routes(service: Arc<ExpenseService>) -> Router {
     Router::new()
         .route("/api/admin/expenses", get(all_expenses))
         .route("/api/admin/expenses/:expense_id", get(expense_by_id))

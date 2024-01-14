@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-use crate::{app_state::AppState, domain};
+use crate::{app_state::AppState, domain::app_user::AppUser};
 
 use super::handlers::{all_users, me, user_by_id};
 
@@ -31,7 +31,7 @@ pub struct UserResponse {
 }
 
 impl UserResponse {
-    pub fn from_user(user: domain::AppUser) -> UserResponse {
+    pub fn from_user(user: AppUser) -> UserResponse {
         UserResponse {
             id: user.id,
             username: user.username,

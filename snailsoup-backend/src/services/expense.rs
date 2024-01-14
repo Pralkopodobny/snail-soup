@@ -1,7 +1,9 @@
 use uuid::Uuid;
 
-use crate::db::{AppUserRepository, ExpenseRepository};
-use crate::domain::{expense, Expense, FullExpense};
+use crate::{
+    db::{AppUserRepository, ExpenseRepository},
+    domain::expense::{Category, Expense, FullExpense, Tag},
+};
 use std::sync::Arc;
 
 pub struct ExpenseService {
@@ -46,7 +48,7 @@ impl ExpenseService {
     pub async fn get_all_tags(
         &self,
         user_id: Uuid,
-    ) -> Result<Option<Vec<expense::Tag>>, ExpenseServiceError> {
+    ) -> Result<Option<Vec<Tag>>, ExpenseServiceError> {
         let user = self
             .user_repository
             .get(user_id)
@@ -68,7 +70,7 @@ impl ExpenseService {
     pub async fn get_all_categories(
         &self,
         user_id: Uuid,
-    ) -> Result<Option<Vec<expense::Category>>, ExpenseServiceError> {
+    ) -> Result<Option<Vec<Category>>, ExpenseServiceError> {
         let user = self
             .user_repository
             .get(user_id)

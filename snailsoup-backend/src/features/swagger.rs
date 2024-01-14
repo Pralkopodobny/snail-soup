@@ -7,17 +7,13 @@ use utoipa_rapidoc::RapiDoc;
 use utoipa_redoc::{Redoc, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::features::expense::handlers::__path_all_expenses;
-use crate::features::expense::handlers::__path_categories_by_user;
-use crate::features::expense::handlers::__path_expense_by_id;
-use crate::features::expense::handlers::__path_tags_by_user;
+use crate::features::expense::handlers::{
+    __path_all_expenses, __path_categories_by_user, __path_expense_by_id, __path_tags_by_user,
+};
 
-use crate::features::user::handlers::__path_all_users;
-use crate::features::user::handlers::__path_me;
-use crate::features::user::handlers::__path_user_by_id;
+use crate::features::user::handlers::{__path_all_users, __path_me, __path_user_by_id};
 
-use crate::features::auth::handlers::__path_login;
-use crate::features::auth::handlers::__path_register;
+use crate::features::auth::handlers::{__path_login, __path_register};
 
 pub fn get_routes() -> Router {
     Router::new()

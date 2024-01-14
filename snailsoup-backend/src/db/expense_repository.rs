@@ -1,11 +1,7 @@
-use sqlx::Pool;
-use sqlx::Postgres;
+use sqlx::{Pool, Postgres};
 use uuid::Uuid;
 
-use crate::domain::expense::Category;
-use crate::domain::expense::FullExpense;
-use crate::domain::expense::Tag;
-use crate::domain::Expense;
+use crate::domain::expense::{Category, Expense, FullExpense, Tag};
 
 pub struct ExpenseRepository {
     pool: Pool<Postgres>,
@@ -40,7 +36,9 @@ impl ExpenseRepository {
                     WHERE et.expense_id = $1
                     ",
                     expense_id
-                ).fetch_all(&self.pool).await?;
+                )
+                .fetch_all(&self.pool)
+                .await?;
                 Ok(Some(FullExpense::from_db(e, tags)))
             }
             None => Ok(None),

@@ -1,15 +1,15 @@
-use std::sync::Arc;
-
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
     Json,
 };
+use std::sync::Arc;
 use uuid::Uuid;
 
-use super::api::{CategoryResponse, ExpenseResponse, FullExpenseResponse, TagResponse};
 use crate::services::expense::{ExpenseService, ExpenseServiceError};
+
+use super::api::{CategoryResponse, ExpenseResponse, FullExpenseResponse, TagResponse};
 
 #[utoipa::path(
     get,

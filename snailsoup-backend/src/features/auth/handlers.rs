@@ -1,6 +1,5 @@
-use std::sync::Arc;
-
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
+use std::sync::Arc;
 
 use crate::services::auth::{AuthService, LoginError, RegisterError};
 

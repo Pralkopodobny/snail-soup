@@ -3,8 +3,12 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
+use crate::{
+    app_state::AppState,
+    domain::expense::{Expense, FullExpense},
+};
+
 use super::handlers::{all_expenses, categories_by_user, expense_by_id, tags_by_user};
-use crate::{app_state::AppState, domain};
 
 pub fn get_admin_routes(app_state: AppState) -> Router {
     Router::new()
@@ -69,7 +73,7 @@ pub struct TagResponse {
 }
 
 impl FullExpenseResponse {
-    pub fn from_expense(expense: domain::FullExpense) -> Self {
+    pub fn from_expense(expense: FullExpense) -> Self {
         FullExpenseResponse {
             id: expense.id,
             user_id: expense.user_id,
@@ -93,7 +97,7 @@ impl FullExpenseResponse {
 }
 
 impl ExpenseResponse {
-    pub fn from_expense(expense: domain::Expense) -> Self {
+    pub fn from_expense(expense: Expense) -> Self {
         ExpenseResponse {
             id: expense.id,
             user_id: expense.user_id,

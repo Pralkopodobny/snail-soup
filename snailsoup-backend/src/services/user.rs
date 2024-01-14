@@ -1,7 +1,7 @@
 use uuid::Uuid;
 
-use crate::db::AppUserRepository;
-use crate::domain::AppUser;
+use crate::{db::AppUserRepository, domain::app_user::AppUser};
+
 use std::sync::Arc;
 
 pub struct UserService {

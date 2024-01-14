@@ -1,14 +1,13 @@
-use std::sync::Arc;
-
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
     Extension, Json,
 };
+use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::{domain::AppUser, services::user::UserService};
+use crate::{domain::app_user::AppUser, services::user::UserService};
 
 use super::api::UserResponse;
 

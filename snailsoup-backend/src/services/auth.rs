@@ -6,10 +6,10 @@ use argon2::{
 };
 use chrono::{DateTime, Duration, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
+use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::{config::Config, db::AppUserRepository, domain::AppUser};
-use std::sync::Arc;
+use crate::{config::Config, db::AppUserRepository, domain::app_user::AppUser};
 
 pub use self::token_claim::TokenClaims;
 

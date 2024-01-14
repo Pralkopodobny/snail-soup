@@ -10,10 +10,11 @@ use std::sync::Arc;
 use dotenv::dotenv;
 use sqlx::postgres::PgPoolOptions;
 
-use crate::app_state::AppState;
-use crate::config::Config;
-use crate::services::auth::AuthService;
-use crate::services::{expense::ExpenseService, user::UserService};
+use crate::{
+    app_state::AppState,
+    config::Config,
+    services::{auth::AuthService, expense::ExpenseService, user::UserService},
+};
 
 #[tokio::main]
 async fn main() {

@@ -8,7 +8,7 @@ use axum::{
 };
 
 use super::api::{ExpenseResponse, FullExpenseResponse, TagResponse};
-use crate::services::{expense::ExpenseServiceError, ExpenseService};
+use crate::services::expense::{ExpenseService, ExpenseServiceError};
 
 #[utoipa::path(
     get,

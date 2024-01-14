@@ -4,7 +4,7 @@ use axum::extract::FromRef;
 
 use crate::{
     config::Config,
-    services::{AuthService, ExpenseService, UserService},
+    services::{auth::AuthService, expense::ExpenseService, user::UserService},
 };
 
 #[derive(Clone)]

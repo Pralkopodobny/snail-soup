@@ -7,7 +7,7 @@ use axum::{
     Extension, Json,
 };
 
-use crate::{domain::AppUser, services::UserService};
+use crate::{domain::AppUser, services::user::UserService};
 
 use super::api::UserResponse;
 

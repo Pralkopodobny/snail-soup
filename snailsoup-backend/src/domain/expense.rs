@@ -16,10 +16,12 @@ pub struct FullExpense {
 
 pub struct Category {
     pub id: Uuid,
+    pub user_id: Uuid,
     pub name: String,
 }
 
 pub struct Tag {
     pub id: Uuid,
+    pub user_id: Uuid,
     pub name: String,
 }

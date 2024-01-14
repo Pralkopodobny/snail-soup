@@ -16,10 +16,9 @@ impl ExpenseRepository {
         let expense = sqlx::query_as!(
             Expense,
             r#"
-            SELECT e.id, e.user_id, e.category_id, e.description, e.expense_date, e.cost
-            FROM expenses e 
-            LEFT JOIN user_categories c ON e.category_id = c.id 
-            WHERE e.id = $1
+            SELECT *
+            FROM expenses
+            WHERE id = $1
             "#,
             expense_id
         )
@@ -50,11 +49,10 @@ impl ExpenseRepository {
     pub async fn get_all_expenses(&self) -> Result<Vec<Expense>, sqlx::Error> {
         let expenses = sqlx::query_as!(
             Expense,
-            r#"
-            SELECT e.id, e.user_id, e.category_id, e.description, e.expense_date, e.cost
-            FROM expenses e 
-            LEFT JOIN user_categories c ON e.category_id = c.id 
-            "#
+            "
+            SELECT *
+            FROM expenses
+            "
         )
         .fetch_all(&self.pool)
         .await?;
@@ -66,7 +64,7 @@ impl ExpenseRepository {
         let tags = sqlx::query_as!(
             Tag,
             "
-            SELECT id, name 
+            SELECT *
             FROM user_tags 
             WHERE user_id = $1
             ",
@@ -85,7 +83,7 @@ impl ExpenseRepository {
         let categories = sqlx::query_as!(
             Category,
             "
-            SELECT id, name 
+            SELECT *
             FROM user_categories 
             WHERE user_id = $1
             ",

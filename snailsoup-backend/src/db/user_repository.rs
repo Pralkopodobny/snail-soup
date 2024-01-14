@@ -1,5 +1,6 @@
 use sqlx::Pool;
 use sqlx::Postgres;
+use uuid::Uuid;
 
 use crate::domain::AppUser;
 
@@ -13,7 +14,7 @@ impl AppUserRepository {
         AppUserRepository { pool: pool }
     }
 
-    pub async fn get(&self, id: uuid::Uuid) -> Result<Option<AppUser>, sqlx::Error> {
+    pub async fn get(&self, id: Uuid) -> Result<Option<AppUser>, sqlx::Error> {
         let user = sqlx::query_as!(
             AppUser,
             "

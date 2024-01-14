@@ -91,10 +91,12 @@ impl ExpenseRepository {
 }
 
 mod schema {
+    use uuid::Uuid;
+
     pub(super) struct ExpenseWithCategoryDb {
-        pub id: uuid::Uuid,
-        pub user_id: uuid::Uuid,
-        pub category_id: Option<uuid::Uuid>,
+        pub id: Uuid,
+        pub user_id: Uuid,
+        pub category_id: Option<Uuid>,
         pub category_name: Option<String>,
         pub description: Option<String>,
         pub expense_date: chrono::NaiveDate,
@@ -102,7 +104,7 @@ mod schema {
     }
 
     pub(super) struct TagDb {
-        pub id: uuid::Uuid,
+        pub id: Uuid,
         pub name: String,
     }
 }

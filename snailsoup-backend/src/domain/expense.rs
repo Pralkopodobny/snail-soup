@@ -1,6 +1,8 @@
+use uuid::Uuid;
+
 pub struct Expense {
-    pub id: uuid::Uuid,
-    pub user_id: uuid::Uuid,
+    pub id: Uuid,
+    pub user_id: Uuid,
     pub description: Option<String>,
     pub expense_date: chrono::NaiveDate,
     pub cost: rust_decimal::Decimal,
@@ -8,8 +10,8 @@ pub struct Expense {
 }
 
 pub struct FullExpense {
-    pub id: uuid::Uuid,
-    pub user_id: uuid::Uuid,
+    pub id: Uuid,
+    pub user_id: Uuid,
     pub description: Option<String>,
     pub expense_date: chrono::NaiveDate,
     pub cost: rust_decimal::Decimal,
@@ -18,11 +20,11 @@ pub struct FullExpense {
 }
 
 pub struct Category {
-    pub id: uuid::Uuid,
+    pub id: Uuid,
     pub name: String,
 }
 
 pub struct Tag {
-    pub id: uuid::Uuid,
+    pub id: Uuid,
     pub name: String,
 }

@@ -1,6 +1,7 @@
 use axum::{routing::get, Router};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use uuid::Uuid;
 
 use super::handlers::{all_expenses, expense_by_id, tags_by_user};
 use crate::{app_state::AppState, domain};
@@ -16,9 +17,9 @@ pub fn get_admin_routes(app_state: AppState) -> Router {
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
 pub struct ExpenseResponse {
     #[schema()]
-    pub id: uuid::Uuid,
+    pub id: Uuid,
     #[schema()]
-    pub user_id: uuid::Uuid,
+    pub user_id: Uuid,
     #[schema()]
     pub description: Option<String>,
     #[schema()]
@@ -32,9 +33,9 @@ pub struct ExpenseResponse {
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
 pub struct FullExpenseResponse {
     #[schema()]
-    pub id: uuid::Uuid,
+    pub id: Uuid,
     #[schema()]
-    pub user_id: uuid::Uuid,
+    pub user_id: Uuid,
     #[schema()]
     pub description: Option<String>,
     #[schema()]
@@ -50,7 +51,7 @@ pub struct FullExpenseResponse {
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
 pub struct CategoryResponse {
     #[schema()]
-    pub id: uuid::Uuid,
+    pub id: Uuid,
     #[schema()]
     pub name: String,
 }
@@ -58,7 +59,7 @@ pub struct CategoryResponse {
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
 pub struct TagResponse {
     #[schema()]
-    pub id: uuid::Uuid,
+    pub id: Uuid,
     #[schema()]
     pub name: String,
 }

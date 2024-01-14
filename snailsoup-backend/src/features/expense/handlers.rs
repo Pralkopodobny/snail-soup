@@ -6,6 +6,7 @@ use axum::{
     response::IntoResponse,
     Json,
 };
+use uuid::Uuid;
 
 use super::api::{ExpenseResponse, FullExpenseResponse, TagResponse};
 use crate::services::expense::{ExpenseService, ExpenseServiceError};
@@ -24,7 +25,7 @@ use crate::services::expense::{ExpenseService, ExpenseServiceError};
     security(("Bearer token" = []))
 )]
 pub(super) async fn expense_by_id(
-    Path(expense_id): Path<uuid::Uuid>,
+    Path(expense_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let expense = service.get_expense(expense_id).await.map_err(|e| match e {
@@ -73,7 +74,7 @@ pub(super) async fn all_expenses(
     security(("Bearer token" = []))
 )]
 pub(super) async fn tags_by_user(
-    Path(user_id): Path<uuid::Uuid>,
+    Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let tags_opt = service

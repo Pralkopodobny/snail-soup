@@ -41,7 +41,7 @@ pub(super) async fn login(
     tag = "Auth",
     request_body = RegisterRequest,
     responses(
-        (status = CREATED, description = "user registered", body=uuid::Uuid),
+        (status = CREATED, description = "user registered", body=Uuid),
         (status = BAD_REQUEST, description = "username already in use")
     )
 )]

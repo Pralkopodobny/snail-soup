@@ -1,6 +1,7 @@
 use axum::{routing::get, Router};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use uuid::Uuid;
 
 use crate::{app_state::AppState, domain};
 
@@ -22,7 +23,7 @@ pub fn get_private_routes(app_state: AppState) -> Router {
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
 pub struct UserResponse {
     #[schema()]
-    pub id: uuid::Uuid,
+    pub id: Uuid,
     #[schema()]
     pub username: String,
     #[schema()]

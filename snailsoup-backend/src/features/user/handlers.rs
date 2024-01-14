@@ -6,6 +6,7 @@ use axum::{
     response::IntoResponse,
     Extension, Json,
 };
+use uuid::Uuid;
 
 use crate::{domain::AppUser, services::user::UserService};
 
@@ -25,7 +26,7 @@ use super::api::UserResponse;
     security(("Bearer token" = []))
 )]
 pub(super) async fn user_by_id(
-    Path(user_id): Path<uuid::Uuid>,
+    Path(user_id): Path<Uuid>,
     service: State<Arc<UserService>>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let user = service.get(user_id).await;

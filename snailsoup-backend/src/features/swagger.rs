@@ -8,6 +8,7 @@ use utoipa_redoc::{Redoc, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::features::expense::handlers::__path_all_expenses;
+use crate::features::expense::handlers::__path_categories_by_user;
 use crate::features::expense::handlers::__path_expense_by_id;
 use crate::features::expense::handlers::__path_tags_by_user;
 
@@ -27,7 +28,7 @@ pub fn get_routes() -> Router {
 
 #[derive(OpenApi)]
 #[openapi(
-            paths(all_expenses, expense_by_id, tags_by_user, all_users, user_by_id, login, register, me),
+            paths(all_expenses, expense_by_id, tags_by_user, categories_by_user, all_users, user_by_id, login, register, me),
             components(
                 schemas(
                     super::expense::api::ExpenseResponse,

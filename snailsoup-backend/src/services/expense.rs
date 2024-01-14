@@ -64,4 +64,26 @@ impl ExpenseService {
 
         Ok(Some(tags))
     }
+
+    pub async fn get_all_categories(
+        &self,
+        user_id: Uuid,
+    ) -> Result<Option<Vec<expense::Category>>, ExpenseServiceError> {
+        let user = self
+            .user_repository
+            .get(user_id)
+            .await
+            .map_err(|_| ExpenseServiceError::InternalServerError)?;
+        if user.is_none() {
+            return Ok(None);
+        }
+
+        let tags = self
+            .expense_repository
+            .get_all_categories_by_user_id(user_id)
+            .await
+            .map_err(|_| ExpenseServiceError::InternalServerError)?;
+
+        Ok(Some(tags))
+    }
 }

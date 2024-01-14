@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-use super::handlers::{all_expenses, expense_by_id, tags_by_user};
+use super::handlers::{all_expenses, categories_by_user, expense_by_id, tags_by_user};
 use crate::{app_state::AppState, domain};
 
 pub fn get_admin_routes(app_state: AppState) -> Router {
@@ -11,6 +11,10 @@ pub fn get_admin_routes(app_state: AppState) -> Router {
         .route("/api/admin/expenses", get(all_expenses))
         .route("/api/admin/expenses/:expense_id", get(expense_by_id))
         .route("/api/admin/users/:user_id/tags", get(tags_by_user))
+        .route(
+            "/api/admin/users/:user_id/categories",
+            get(categories_by_user),
+        )
         .with_state(app_state)
 }
 

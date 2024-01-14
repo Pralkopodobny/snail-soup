@@ -8,7 +8,7 @@ use axum::{
 };
 use uuid::Uuid;
 
-use super::api::{ExpenseResponse, FullExpenseResponse, TagResponse};
+use super::api::{CategoryResponse, ExpenseResponse, FullExpenseResponse, TagResponse};
 use crate::services::expense::{ExpenseService, ExpenseServiceError};
 
 #[utoipa::path(
@@ -96,4 +96,39 @@ pub(super) async fn tags_by_user(
     };
 
     Ok(Json(tags))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/admin/users/{user_id}/categories",
+    tag = "Expenses",
+    responses(
+        (status = OK, description = "list tags successfully", body = [CategoryResponse]),
+        (status = NOT_FOUND, description = "user does not exists")
+    ),
+    security(("Bearer token" = []))
+)]
+pub(super) async fn categories_by_user(
+    Path(user_id): Path<Uuid>,
+    service: State<Arc<ExpenseService>>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let categories_opt = service
+        .get_all_categories(user_id)
+        .await
+        .map_err(|err| match err {
+            ExpenseServiceError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
+        })?;
+
+    let categories: Vec<CategoryResponse> = match categories_opt {
+        None => Err(StatusCode::NOT_FOUND)?,
+        Some(tags) => tags
+            .into_iter()
+            .map(|t| CategoryResponse {
+                id: t.id,
+                name: t.name,
+            })
+            .collect(),
+    };
+
+    Ok(Json(categories))
 }

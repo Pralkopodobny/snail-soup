@@ -5,7 +5,6 @@ use utoipa::ToSchema;
 use super::handlers::{all_expenses, expense_by_id, tags_by_user};
 use crate::{app_state::AppState, domain};
 
-//TODO: secure them
 pub fn get_admin_routes(app_state: AppState) -> Router {
     Router::new()
         .route("/api/admin/expenses", get(all_expenses))

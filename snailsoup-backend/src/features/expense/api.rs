@@ -27,15 +27,15 @@ pub struct ExpenseResponse {
     #[schema()]
     pub id: Uuid,
     #[schema()]
-    pub user_id: Uuid,
+    pub user: Uuid,
+    #[schema()]
+    pub category: Option<Uuid>,
     #[schema()]
     pub description: Option<String>,
     #[schema()]
     pub expense_date: chrono::NaiveDate,
     #[schema()]
     pub cost: rust_decimal::Decimal,
-    #[schema()]
-    pub category: Option<Uuid>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
@@ -43,17 +43,17 @@ pub struct FullExpenseResponse {
     #[schema()]
     pub id: Uuid,
     #[schema()]
-    pub user_id: Uuid,
+    pub user: Uuid,
+    #[schema()]
+    pub category: Option<Uuid>,
+    #[schema()]
+    pub tags: Vec<Uuid>,
     #[schema()]
     pub description: Option<String>,
     #[schema()]
     pub expense_date: chrono::NaiveDate,
     #[schema()]
     pub cost: rust_decimal::Decimal,
-    #[schema()]
-    pub category: Option<Uuid>,
-    #[schema()]
-    pub tags: Vec<Uuid>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
@@ -76,12 +76,12 @@ impl From<FullExpense> for FullExpenseResponse {
     fn from(value: FullExpense) -> Self {
         FullExpenseResponse {
             id: value.expense.id,
-            user_id: value.expense.user_id,
+            user: value.expense.user_id,
+            category: value.expense.category_id,
+            tags: value.tags_ids,
             description: value.expense.description,
             expense_date: value.expense.expense_date,
             cost: value.expense.cost,
-            category: value.expense.category_id,
-            tags: value.tags_ids,
         }
     }
 }
@@ -90,11 +90,11 @@ impl From<Expense> for ExpenseResponse {
     fn from(value: Expense) -> Self {
         ExpenseResponse {
             id: value.id,
-            user_id: value.user_id,
+            user: value.user_id,
+            category: value.category_id,
             description: value.description,
             expense_date: value.expense_date,
             cost: value.cost,
-            category: value.category_id,
         }
     }
 }

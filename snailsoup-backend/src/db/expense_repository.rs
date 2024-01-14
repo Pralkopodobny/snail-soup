@@ -21,7 +21,8 @@ impl ExpenseRepository {
             schema::ExpenseWithCategoryDb,
             r#"
             SELECT e.id, e.user_id, e.category_id, c.name "category_name", e.description, e.expense_date, e.cost
-            FROM expenses e LEFT JOIN user_categories c ON e.category_id = c.id 
+            FROM expenses e 
+            LEFT JOIN user_categories c ON e.category_id = c.id 
             WHERE e.id = $1
             "#,
             expense_id
@@ -34,7 +35,9 @@ impl ExpenseRepository {
                 let tags = sqlx::query_as!(
                     schema::TagDb,
                     "
-                    SELECT ut.id, ut.name FROM expense_tags et JOIN user_tags ut ON et.user_tag_id = ut.id WHERE et.expense_id = $1
+                    SELECT ut.id, ut.name FROM expense_tags et 
+                    JOIN user_tags ut ON et.user_tag_id = ut.id 
+                    WHERE et.expense_id = $1
                     ",
                     expense_id
                 ).fetch_all(&self.pool).await?;
@@ -49,7 +52,8 @@ impl ExpenseRepository {
             schema::ExpenseWithCategoryDb,
             r#"
             SELECT e.id, e.user_id, e.category_id, c.name "category_name", e.description, e.expense_date, e.cost
-            FROM expenses e LEFT JOIN user_categories c ON e.category_id = c.id 
+            FROM expenses e 
+            LEFT JOIN user_categories c ON e.category_id = c.id 
             "#
         )
         .fetch_all(&self.pool)
@@ -62,7 +66,9 @@ impl ExpenseRepository {
         let tags = sqlx::query_as!(
             Tag,
             "
-            SELECT id, name FROM user_tags WHERE user_id = $1
+            SELECT id, name 
+            FROM user_tags 
+            WHERE user_id = $1
             ",
             user_id
         )
@@ -79,7 +85,9 @@ impl ExpenseRepository {
         let categories = sqlx::query_as!(
             Category,
             "
-            SELECT id, name FROM user_categories WHERE user_id = $1
+            SELECT id, name 
+            FROM user_categories 
+            WHERE user_id = $1
             ",
             user_id
         )

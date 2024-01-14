@@ -15,11 +15,11 @@ impl ExpenseRepository {
     pub async fn get_expense(&self, expense_id: Uuid) -> Result<Option<FullExpense>, sqlx::Error> {
         let expense = sqlx::query_as!(
             Expense,
-            r#"
+            "
             SELECT *
             FROM expenses
             WHERE id = $1
-            "#,
+            ",
             expense_id
         )
         .fetch_optional(&self.pool)
@@ -28,10 +28,10 @@ impl ExpenseRepository {
         match expense {
             Some(e) => {
                 let tags = sqlx::query_scalar!(
-                    r#"
+                    "
                     SELECT user_tag_id FROM expense_tags
                     WHERE expense_id = $1
-                    "#,
+                    ",
                     expense_id
                 )
                 .fetch_all(&self.pool)

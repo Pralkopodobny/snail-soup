@@ -3,20 +3,15 @@ use uuid::Uuid;
 pub struct Expense {
     pub id: Uuid,
     pub user_id: Uuid,
+    pub category_id: Option<Uuid>,
     pub description: Option<String>,
     pub expense_date: chrono::NaiveDate,
     pub cost: rust_decimal::Decimal,
-    pub category: Option<Category>,
 }
 
 pub struct FullExpense {
-    pub id: Uuid,
-    pub user_id: Uuid,
-    pub description: Option<String>,
-    pub expense_date: chrono::NaiveDate,
-    pub cost: rust_decimal::Decimal,
-    pub category: Option<Category>,
-    pub tags: Vec<Tag>,
+    pub expense: Expense,
+    pub tags_ids: Vec<Uuid>,
 }
 
 pub struct Category {

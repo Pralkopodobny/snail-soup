@@ -35,7 +35,7 @@ pub struct ExpenseResponse {
     #[schema()]
     pub cost: rust_decimal::Decimal,
     #[schema()]
-    pub category: Option<CategoryResponse>,
+    pub category: Option<Uuid>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
@@ -51,9 +51,9 @@ pub struct FullExpenseResponse {
     #[schema()]
     pub cost: rust_decimal::Decimal,
     #[schema()]
-    pub category: Option<CategoryResponse>,
+    pub category: Option<Uuid>,
     #[schema()]
-    pub tags: Vec<TagResponse>,
+    pub tags: Vec<Uuid>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
@@ -72,42 +72,29 @@ pub struct TagResponse {
     pub name: String,
 }
 
-impl FullExpenseResponse {
-    pub fn from_expense(expense: FullExpense) -> Self {
+impl From<FullExpense> for FullExpenseResponse {
+    fn from(value: FullExpense) -> Self {
         FullExpenseResponse {
-            id: expense.id,
-            user_id: expense.user_id,
-            description: expense.description,
-            expense_date: expense.expense_date,
-            cost: expense.cost,
-            category: expense.category.map(|x| CategoryResponse {
-                id: x.id,
-                name: x.name,
-            }),
-            tags: expense
-                .tags
-                .into_iter()
-                .map(|x| TagResponse {
-                    id: x.id,
-                    name: x.name,
-                })
-                .collect(),
+            id: value.expense.id,
+            user_id: value.expense.user_id,
+            description: value.expense.description,
+            expense_date: value.expense.expense_date,
+            cost: value.expense.cost,
+            category: value.expense.category_id,
+            tags: value.tags_ids,
         }
     }
 }
 
-impl ExpenseResponse {
-    pub fn from_expense(expense: Expense) -> Self {
+impl From<Expense> for ExpenseResponse {
+    fn from(value: Expense) -> Self {
         ExpenseResponse {
-            id: expense.id,
-            user_id: expense.user_id,
-            description: expense.description,
-            expense_date: expense.expense_date,
-            cost: expense.cost,
-            category: expense.category.map(|x| CategoryResponse {
-                id: x.id,
-                name: x.name,
-            }),
+            id: value.id,
+            user_id: value.user_id,
+            description: value.description,
+            expense_date: value.expense_date,
+            cost: value.cost,
+            category: value.category_id,
         }
     }
 }

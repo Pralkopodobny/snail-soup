@@ -33,7 +33,7 @@ pub(super) async fn expense_by_id(
     })?;
 
     match expense {
-        Some(e) => Ok(Json(FullExpenseResponse::from_expense(e))),
+        Some(e) => Ok(Json(FullExpenseResponse::from(e))),
         None => Err(StatusCode::NOT_FOUND),
     }
 }
@@ -57,7 +57,7 @@ pub(super) async fn all_expenses(
             ExpenseServiceError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
         })?
         .into_iter()
-        .map(|e| ExpenseResponse::from_expense(e))
+        .map(|e| ExpenseResponse::from(e))
         .collect();
 
     Ok(Json(expenses))

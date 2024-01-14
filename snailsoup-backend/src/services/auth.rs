@@ -1,6 +1,9 @@
 mod token_claim;
 
-use argon2::{Argon2, PasswordHash, PasswordVerifier};
+use argon2::{
+    password_hash::{rand_core::OsRng, SaltString},
+    Argon2, PasswordHash, PasswordHasher, PasswordVerifier,
+};
 use chrono::{DateTime, Duration, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use uuid::Uuid;
@@ -27,6 +30,11 @@ pub enum AuthError {
     InvalidToken,
     ExpiredToken,
     UserDoesNotExist,
+    InternalError,
+}
+
+pub enum RegisterError {
+    UsernameInUse,
     InternalError,
 }
 
@@ -79,6 +87,43 @@ impl AuthService {
         .map_err(|_| LoginError::UnexpectedError)?;
 
         Ok(token)
+    }
+
+    pub async fn register(&self, username: &str, password: &str) -> Result<AppUser, RegisterError> {
+        let salt = SaltString::generate(&mut OsRng);
+        let hashed_password = Argon2::default()
+            .hash_password(password.as_bytes(), &salt)
+            .map_err(|_| RegisterError::InternalError)
+            .map(|hash| hash.to_string())?;
+
+        let existing_user = self
+            .user_repository
+            .get_by_name(username)
+            .await
+            .map_err(|e| {
+                println!("{}", e);
+                RegisterError::InternalError
+            })?;
+
+        if existing_user.is_some() {
+            return Err(RegisterError::UsernameInUse);
+        }
+
+        let created_user = self
+            .user_repository
+            .insert(AppUser {
+                id: Uuid::new_v4(),
+                username: username.to_owned(),
+                password_hash: hashed_password,
+                account_role: "User".to_owned(),
+            })
+            .await
+            .map_err(|e| {
+                println!("{}", e);
+                RegisterError::InternalError
+            })?;
+
+        Ok(created_user)
     }
 
     pub async fn auth_bearer_token(&self, token: &str) -> Result<AppUser, AuthError> {

@@ -1,5 +1,6 @@
 use sqlx::Pool;
 use sqlx::Postgres;
+use uuid::Uuid;
 
 use crate::domain::expense::Category;
 use crate::domain::expense::FullExpense;
@@ -15,7 +16,7 @@ impl ExpenseRepository {
         ExpenseRepository { pool: pool }
     }
 
-    pub async fn get(&self, id: uuid::Uuid) -> Result<Option<FullExpense>, sqlx::Error> {
+    pub async fn get_expense(&self, expense_id: Uuid) -> Result<Option<FullExpense>, sqlx::Error> {
         let expense = sqlx::query_as!(
             schema::ExpenseWithCategoryDb,
             "
@@ -23,7 +24,7 @@ impl ExpenseRepository {
             FROM expenses e LEFT JOIN user_categories c ON e.category_id = c.id 
             WHERE e.id = $1
             ",
-            id
+            expense_id
         )
         .fetch_optional(&self.pool)
         .await?;
@@ -35,7 +36,7 @@ impl ExpenseRepository {
                     "
                     SELECT ut.id, ut.name FROM expense_tags et JOIN user_tags ut ON et.user_tag_id = ut.id WHERE et.expense_id = $1
                     ",
-                    id
+                    expense_id
                 ).fetch_all(&self.pool).await?;
                 Ok(Some(FullExpense::from_db(e, tags)))
             }
@@ -43,7 +44,7 @@ impl ExpenseRepository {
         }
     }
 
-    pub async fn get_all(&self) -> Result<Vec<Expense>, sqlx::Error> {
+    pub async fn get_all_expenses(&self) -> Result<Vec<Expense>, sqlx::Error> {
         let expenses = sqlx::query_as!(
             schema::ExpenseWithCategoryDb,
             "
@@ -55,6 +56,37 @@ impl ExpenseRepository {
         .await?.into_iter().map(|e| Expense::from_db(e)).collect();
 
         Ok(expenses)
+    }
+
+    pub async fn get_all_tags_by_user_id(&self, user_id: Uuid) -> Result<Vec<Tag>, sqlx::Error> {
+        let tags = sqlx::query_as!(
+            Tag,
+            "
+            SELECT id, name FROM user_tags WHERE user_id = $1
+            ",
+            user_id
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(tags)
+    }
+
+    pub async fn get_all_categories_by_user_id(
+        &self,
+        user_id: Uuid,
+    ) -> Result<Vec<Category>, sqlx::Error> {
+        let categories = sqlx::query_as!(
+            Category,
+            "
+            SELECT id, name FROM user_categories WHERE user_id = $1
+            ",
+            user_id
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(categories)
     }
 }
 

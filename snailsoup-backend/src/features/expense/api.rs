@@ -2,7 +2,7 @@ use axum::{routing::get, Router};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use super::handlers::{all_expenses, expense_by_id};
+use super::handlers::{all_expenses, expense_by_id, tags_by_user};
 use crate::{app_state::AppState, domain};
 
 //TODO: secure them
@@ -10,6 +10,7 @@ pub fn get_admin_routes(app_state: AppState) -> Router {
     Router::new()
         .route("/api/admin/expenses", get(all_expenses))
         .route("/api/admin/expenses/:expense_id", get(expense_by_id))
+        .route("/api/admin/users/:user_id/tags", get(tags_by_user))
         .with_state(app_state)
 }
 

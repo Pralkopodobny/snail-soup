@@ -7,8 +7,8 @@ use axum::{
     Json,
 };
 
-use super::api::{ExpenseResponse, FullExpenseResponse};
-use crate::services::ExpenseService;
+use super::api::{ExpenseResponse, FullExpenseResponse, TagResponse};
+use crate::services::{expense::ExpenseServiceError, ExpenseService};
 
 #[utoipa::path(
     get,
@@ -27,7 +27,9 @@ pub(super) async fn expense_by_id(
     Path(expense_id): Path<uuid::Uuid>,
     service: State<Arc<ExpenseService>>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let expense = service.get(expense_id).await;
+    let expense = service.get_expense(expense_id).await.map_err(|e| match e {
+        ExpenseServiceError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
+    })?;
 
     match expense {
         Some(e) => Ok(Json(FullExpenseResponse::from_expense(e))),
@@ -44,13 +46,53 @@ pub(super) async fn expense_by_id(
     ),
     security(("Bearer token" = []))
 )]
-pub(super) async fn all_expenses(service: State<Arc<ExpenseService>>) -> impl IntoResponse {
+pub(super) async fn all_expenses(
+    service: State<Arc<ExpenseService>>,
+) -> Result<impl IntoResponse, StatusCode> {
     let expenses: Vec<ExpenseResponse> = service
-        .get_all()
+        .get_all_expenses()
         .await
+        .map_err(|e| match e {
+            ExpenseServiceError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
+        })?
         .into_iter()
         .map(|e| ExpenseResponse::from_expense(e))
         .collect();
 
-    Json(expenses)
+    Ok(Json(expenses))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/admin/users/{user_id}/tags",
+    tag = "Expenses",
+    responses(
+        (status = OK, description = "list tags successfully", body = [TagResponse]),
+        (status = NOT_FOUND, description = "user does not exists")
+    ),
+    security(("Bearer token" = []))
+)]
+pub(super) async fn tags_by_user(
+    Path(user_id): Path<uuid::Uuid>,
+    service: State<Arc<ExpenseService>>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let tags_opt = service
+        .get_all_tags(user_id)
+        .await
+        .map_err(|err| match err {
+            ExpenseServiceError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
+        })?;
+
+    let tags: Vec<TagResponse> = match tags_opt {
+        None => Err(StatusCode::NOT_FOUND)?,
+        Some(tags) => tags
+            .into_iter()
+            .map(|t| TagResponse {
+                id: t.id,
+                name: t.name,
+            })
+            .collect(),
+    };
+
+    Ok(Json(tags))
 }

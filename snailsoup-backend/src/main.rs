@@ -42,7 +42,7 @@ async fn main() {
         config.clone(),
         Arc::new(AuthService::new(app_user_repo.clone(), config.clone())),
         Arc::new(UserService::new(app_user_repo.clone())),
-        Arc::new(ExpenseService::new(expense_repository.clone())),
+        Arc::new(ExpenseService::new(expense_repository.clone(), app_user_repo.clone())),
     );
 
     let app = features::get_routes(app_state);

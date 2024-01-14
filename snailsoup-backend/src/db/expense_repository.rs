@@ -19,11 +19,11 @@ impl ExpenseRepository {
     pub async fn get_expense(&self, expense_id: Uuid) -> Result<Option<FullExpense>, sqlx::Error> {
         let expense = sqlx::query_as!(
             schema::ExpenseWithCategoryDb,
-            "
-            SELECT e.id, e.user_id, e.category_id, c.name \"category_name\", e.description, e.expense_date, e.cost
+            r#"
+            SELECT e.id, e.user_id, e.category_id, c.name "category_name", e.description, e.expense_date, e.cost
             FROM expenses e LEFT JOIN user_categories c ON e.category_id = c.id 
             WHERE e.id = $1
-            ",
+            "#,
             expense_id
         )
         .fetch_optional(&self.pool)
@@ -47,10 +47,10 @@ impl ExpenseRepository {
     pub async fn get_all_expenses(&self) -> Result<Vec<Expense>, sqlx::Error> {
         let expenses = sqlx::query_as!(
             schema::ExpenseWithCategoryDb,
-            "
-            SELECT e.id, e.user_id, e.category_id, c.name \"category_name\", e.description, e.expense_date, e.cost
+            r#"
+            SELECT e.id, e.user_id, e.category_id, c.name "category_name", e.description, e.expense_date, e.cost
             FROM expenses e LEFT JOIN user_categories c ON e.category_id = c.id 
-            "
+            "#
         )
         .fetch_all(&self.pool)
         .await?.into_iter().map(|e| Expense::from_db(e)).collect();

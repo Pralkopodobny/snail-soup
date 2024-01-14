@@ -15,7 +15,7 @@ use crate::services::ExpenseService;
     path = "/api/admin/expenses/{id}",
     tag = "Expenses",
     responses(
-        (status = 200, description = "Expense found successfully", body = FullExpenseResponse),
+        (status = OK, description = "Expense found successfully", body = FullExpenseResponse),
         (status = NOT_FOUND, description = "Expense not found")
     ),
     params(
@@ -40,7 +40,7 @@ pub(super) async fn expense_by_id(
     path = "/api/admin/expenses",
     tag = "Expenses",
     responses(
-        (status = 200, description = "list expenses successfully", body = [ExpenseResponse])
+        (status = OK, description = "list expenses successfully", body = [ExpenseResponse])
     ),
     security(("Bearer token" = []))
 )]

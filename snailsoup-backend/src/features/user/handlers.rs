@@ -16,7 +16,7 @@ use super::api::UserResponse;
     path = "/api/admin/users/{id}",
     tag = "Users",
     responses(
-        (status = 200, description = "User found successfully", body = UserResponse),
+        (status = OK, description = "User found successfully", body = UserResponse),
         (status = NOT_FOUND, description = "User not found")
     ),
     params(
@@ -41,7 +41,7 @@ pub(super) async fn user_by_id(
     path = "/api/admin/users",
     tag = "Users",
     responses(
-        (status = 200, description = "list users successfully", body = [UserResponse])
+        (status = OK, description = "list users successfully", body = [UserResponse])
     ),
     security(("Bearer token" = []))
 )]
@@ -61,7 +61,7 @@ pub(super) async fn all_users(service: State<Arc<UserService>>) -> impl IntoResp
     path = "/api/users/me",
     tag = "Users",
     responses(
-        (status = 200, description = "User found successfully", body = UserResponse),
+        (status = OK, description = "User found successfully", body = UserResponse),
     ),
     security(("Bearer token" = []))
 )]

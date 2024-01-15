@@ -1,4 +1,7 @@
-use axum::{routing::get, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
@@ -8,7 +11,9 @@ use crate::{
     domain::expense::{Expense, FullExpense},
 };
 
-use super::handlers::{all_expenses, categories_by_user, expense_by_id, tags_by_user};
+use super::handlers::{
+    all_expenses, categories_by_user, create_category, create_tag, expense_by_id, tags_by_user,
+};
 
 pub fn get_admin_routes(app_state: AppState) -> Router {
     Router::new()
@@ -19,6 +24,11 @@ pub fn get_admin_routes(app_state: AppState) -> Router {
             "/api/admin/users/:user_id/categories",
             get(categories_by_user),
         )
+        .route(
+            "/api/admin/users/:user_id/categories",
+            post(create_category),
+        )
+        .route("/api/admin/users/:user_id/tags", post(create_tag))
         .with_state(app_state)
 }
 
@@ -60,6 +70,18 @@ pub struct FullExpenseResponse {
 pub struct CategoryResponse {
     #[schema()]
     pub id: Uuid,
+    #[schema()]
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Clone)]
+pub struct CreateCategoryRequest {
+    #[schema()]
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Clone)]
+pub struct CreateTagRequest {
     #[schema()]
     pub name: String,
 }

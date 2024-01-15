@@ -11,8 +11,14 @@ pub struct ExpenseService {
     user_repository: Arc<AppUserRepository>,
 }
 
-pub enum ExpenseServiceError {
+pub enum ExpenseServiceGetError {
     InternalServerError,
+}
+
+pub enum ExpenseServiceCreateError {
+    InternalServerError,
+    NoUser,
+    ValidationError(String),
 }
 
 impl ExpenseService {
@@ -29,31 +35,31 @@ impl ExpenseService {
     pub async fn get_expense(
         &self,
         expense_id: Uuid,
-    ) -> Result<Option<FullExpense>, ExpenseServiceError> {
+    ) -> Result<Option<FullExpense>, ExpenseServiceGetError> {
         Ok(self
             .expense_repository
             .get_expense(expense_id)
             .await
-            .map_err(|_| ExpenseServiceError::InternalServerError)?)
+            .map_err(|_| ExpenseServiceGetError::InternalServerError)?)
     }
 
-    pub async fn get_all_expenses(&self) -> Result<Vec<Expense>, ExpenseServiceError> {
+    pub async fn get_all_expenses(&self) -> Result<Vec<Expense>, ExpenseServiceGetError> {
         Ok(self
             .expense_repository
             .get_all_expenses()
             .await
-            .map_err(|_| ExpenseServiceError::InternalServerError)?)
+            .map_err(|_| ExpenseServiceGetError::InternalServerError)?)
     }
 
     pub async fn get_all_tags(
         &self,
         user_id: Uuid,
-    ) -> Result<Option<Vec<Tag>>, ExpenseServiceError> {
+    ) -> Result<Option<Vec<Tag>>, ExpenseServiceGetError> {
         let user = self
             .user_repository
             .get(user_id)
             .await
-            .map_err(|_| ExpenseServiceError::InternalServerError)?;
+            .map_err(|_| ExpenseServiceGetError::InternalServerError)?;
         if user.is_none() {
             return Ok(None);
         }
@@ -62,20 +68,47 @@ impl ExpenseService {
             .expense_repository
             .get_all_tags_by_user_id(user_id)
             .await
-            .map_err(|_| ExpenseServiceError::InternalServerError)?;
+            .map_err(|_| ExpenseServiceGetError::InternalServerError)?;
 
         Ok(Some(tags))
+    }
+
+    pub async fn create_tag(
+        &self,
+        user_id: Uuid,
+        name: &str,
+    ) -> Result<Uuid, ExpenseServiceCreateError> {
+        let user = self
+            .user_repository
+            .get(user_id)
+            .await
+            .map_err(|_| ExpenseServiceCreateError::InternalServerError)?;
+
+        if user.is_none() {
+            return Err(ExpenseServiceCreateError::NoUser);
+        }
+
+        let new_tag = Tag {
+            id: Uuid::new_v4(),
+            user_id: user_id,
+            name: name.to_owned(),
+        };
+
+        self.expense_repository
+            .insert_tag(new_tag)
+            .await
+            .map_err(|_| ExpenseServiceCreateError::InternalServerError)
     }
 
     pub async fn get_all_categories(
         &self,
         user_id: Uuid,
-    ) -> Result<Option<Vec<Category>>, ExpenseServiceError> {
+    ) -> Result<Option<Vec<Category>>, ExpenseServiceGetError> {
         let user = self
             .user_repository
             .get(user_id)
             .await
-            .map_err(|_| ExpenseServiceError::InternalServerError)?;
+            .map_err(|_| ExpenseServiceGetError::InternalServerError)?;
         if user.is_none() {
             return Ok(None);
         }
@@ -84,8 +117,35 @@ impl ExpenseService {
             .expense_repository
             .get_all_categories_by_user_id(user_id)
             .await
-            .map_err(|_| ExpenseServiceError::InternalServerError)?;
+            .map_err(|_| ExpenseServiceGetError::InternalServerError)?;
 
         Ok(Some(tags))
+    }
+
+    pub async fn create_category(
+        &self,
+        user_id: Uuid,
+        name: &str,
+    ) -> Result<Uuid, ExpenseServiceCreateError> {
+        let user = self
+            .user_repository
+            .get(user_id)
+            .await
+            .map_err(|_| ExpenseServiceCreateError::InternalServerError)?;
+
+        if user.is_none() {
+            return Err(ExpenseServiceCreateError::NoUser);
+        }
+
+        let new_category = Category {
+            id: Uuid::new_v4(),
+            user_id: user_id,
+            name: name.to_owned(),
+        };
+
+        self.expense_repository
+            .insert_category(new_category)
+            .await
+            .map_err(|_| ExpenseServiceCreateError::InternalServerError)
     }
 }

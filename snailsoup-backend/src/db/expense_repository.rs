@@ -84,7 +84,8 @@ impl ExpenseRepository {
             tag.id,
             tag.user_id,
             tag.name
-        ).fetch_one(&self.pool)
+        )
+        .fetch_one(&self.pool)
         .await?;
 
         Ok(id)
@@ -96,7 +97,8 @@ impl ExpenseRepository {
             DELETE FROM user_tags WHERE id = $1 RETURNING id
             "#,
             tag_id
-        ).fetch_optional(&self.pool)
+        )
+        .fetch_optional(&self.pool)
         .await?;
 
         Ok(id)
@@ -129,7 +131,8 @@ impl ExpenseRepository {
             category.id,
             category.user_id,
             category.name
-        ).fetch_one(&self.pool)
+        )
+        .fetch_one(&self.pool)
         .await?;
 
         Ok(id)
@@ -141,21 +144,31 @@ impl ExpenseRepository {
             DELETE FROM user_categories WHERE id = $1 RETURNING id
             "#,
             category_id
-        ).fetch_optional(&self.pool)
+        )
+        .fetch_optional(&self.pool)
         .await?;
 
         Ok(id)
     }
 
-    pub async fn delete_category_force(&self, category_id: Uuid) -> Result<Option<Uuid>, sqlx::Error> {
+    pub async fn delete_category_force(
+        &self,
+        category_id: Uuid,
+    ) -> Result<Option<Uuid>, sqlx::Error> {
         let mut transaction = self.pool.begin().await?;
-        sqlx::query!("UPDATE expenses SET category_id = NULL WHERE category_id = $1", category_id).execute(&mut *transaction).await?;
+        sqlx::query!(
+            "UPDATE expenses SET category_id = NULL WHERE category_id = $1",
+            category_id
+        )
+        .execute(&mut *transaction)
+        .await?;
         let id = sqlx::query_scalar!(
             r#"
             DELETE FROM user_categories WHERE id = $1 RETURNING id
             "#,
             category_id
-        ).fetch_optional(&mut *transaction)
+        )
+        .fetch_optional(&mut *transaction)
         .await?;
 
         transaction.commit().await?;

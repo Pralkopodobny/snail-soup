@@ -14,7 +14,7 @@ use super::api::UserResponse;
 #[utoipa::path(
     get,
     path = "/api/admin/users/{id}",
-    tag = "Users",
+    tag = "Users - Admin",
     responses(
         (status = OK, description = "User found successfully", body = UserResponse),
         (status = NOT_FOUND, description = "User not found")
@@ -39,7 +39,7 @@ pub(super) async fn user_by_id(
 #[utoipa::path(
     get,
     path = "/api/admin/users",
-    tag = "Users",
+    tag = "Users - Admin",
     responses(
         (status = OK, description = "list users successfully", body = [UserResponse])
     ),

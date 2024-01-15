@@ -8,7 +8,8 @@ use utoipa_redoc::{Redoc, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::features::expense::handlers::{
-    __path_all_expenses, __path_categories_by_user, __path_expense_by_id, __path_tags_by_user,
+    __path_all_expenses, __path_categories_by_user, __path_create_category, __path_create_tag,
+    __path_expense_by_id, __path_tags_by_user,
 };
 
 use crate::features::user::handlers::{__path_all_users, __path_me, __path_user_by_id};
@@ -24,16 +25,23 @@ pub fn get_routes() -> Router {
 
 #[derive(OpenApi)]
 #[openapi(
-            paths(all_expenses, expense_by_id, tags_by_user, categories_by_user, all_users, user_by_id, login, register, me),
+            paths(
+                login, register,
+                all_expenses, expense_by_id, tags_by_user, categories_by_user, create_category, create_tag,
+                all_users, user_by_id, me
+            ),
             components(
                 schemas(
                     super::expense::api::ExpenseResponse,
                     super::expense::api::FullExpenseResponse,
                     super::expense::api::CategoryResponse,
                     super::expense::api::TagResponse,
+                    super::expense::api::CreateTagRequest,
+                    super::expense::api::CreateCategoryRequest,
                     super::user::api::UserResponse,
                     super::auth::api::LoginRequest,
-                    super::auth::api::RegisterRequest)
+                    super::auth::api::RegisterRequest
+                )
             ),
             modifiers(&SecurityAddon),
             tags(

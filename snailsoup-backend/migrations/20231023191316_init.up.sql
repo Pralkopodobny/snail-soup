@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS expense_tags (
     id UUID PRIMARY KEY,
     user_tag_id UUID NOT NULL,
     expense_id UUID NOT NULL,
+    CONSTRAINT unique__expense_tags__user_tag_id__expense_id UNIQUE(user_tag_id, expense_id),
     CONSTRAINT fk__expense_tags__user_tag_id FOREIGN KEY(user_tag_id) REFERENCES user_tags(id),
     CONSTRAINT fk__expense_tags__expense_id FOREIGN KEY(expense_id) REFERENCES expenses(id)
 );

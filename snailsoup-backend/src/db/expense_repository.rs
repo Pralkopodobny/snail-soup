@@ -1,7 +1,10 @@
 use sqlx::{Pool, Postgres};
 use uuid::Uuid;
 
-use crate::domain::expense::{Category, Expense, FullExpense, Tag};
+use crate::{
+    domain::expense::{Category, Expense, FullExpense, Tag},
+    utils::period::DatePeriod,
+};
 
 pub struct ExpenseRepository {
     pool: Pool<Postgres>,
@@ -72,6 +75,28 @@ impl ExpenseRepository {
             WHERE user_id = $1
             ",
             user_id
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(expenses)
+    }
+
+    pub async fn get_all_expenses_by_user_id_in_period(
+        &self,
+        user_id: Uuid,
+        period: DatePeriod,
+    ) -> Result<Vec<Expense>, sqlx::Error> {
+        let expenses = sqlx::query_as!(
+            Expense,
+            "
+            SELECT *
+            FROM expenses
+            WHERE user_id = $1 AND expense_date >= $2 AND expense_date < $3
+            ",
+            user_id,
+            period.from,
+            period.to
         )
         .fetch_all(&self.pool)
         .await?;

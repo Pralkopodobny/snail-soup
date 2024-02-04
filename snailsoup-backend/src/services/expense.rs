@@ -3,6 +3,7 @@ use uuid::Uuid;
 use crate::{
     db::{AppUserRepository, ExpenseRepository},
     domain::expense::{Category, Expense, FullExpense, Tag},
+    utils::period::DatePeriod,
 };
 use std::sync::Arc;
 
@@ -67,6 +68,29 @@ impl ExpenseService {
         let expenses = self
             .expense_repository
             .get_all_expenses_by_user_id(user_id)
+            .await
+            .map_err(|_| ExpenseServiceGetError::InternalServerError)?;
+
+        Ok(Some(expenses))
+    }
+
+    pub async fn get_user_expenses_in_period(
+        &self,
+        user_id: Uuid,
+        period: DatePeriod,
+    ) -> Result<Option<Vec<Expense>>, ExpenseServiceGetError> {
+        let user = self
+            .user_repository
+            .get(user_id)
+            .await
+            .map_err(|_| ExpenseServiceGetError::InternalServerError)?;
+        if user.is_none() {
+            return Ok(None);
+        }
+
+        let expenses = self
+            .expense_repository
+            .get_all_expenses_by_user_id_in_period(user_id, period)
             .await
             .map_err(|_| ExpenseServiceGetError::InternalServerError)?;
 

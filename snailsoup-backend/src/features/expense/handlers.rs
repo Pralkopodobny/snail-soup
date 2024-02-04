@@ -10,6 +10,7 @@ use uuid::Uuid;
 
 use crate::{
     domain::app_user::AppUser,
+    features::response::HttpError,
     services::expense::{ExpenseService, ExpenseServiceGetError},
     utils::period::DatePeriod,
 };
@@ -31,7 +32,7 @@ pub(super) async fn expense_by_id(
     Extension(user): Extension<AppUser>,
     Path(expense_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, StatusCode> {
+) -> Result<impl IntoResponse, HttpError> {
     let expense = service.get_expense(expense_id).await.map_err(|e| match e {
         ExpenseServiceGetError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
     })?;
@@ -59,7 +60,7 @@ pub(super) async fn expense_by_id(
 pub(super) async fn expenses(
     Extension(user): Extension<AppUser>,
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, StatusCode> {
+) -> Result<impl IntoResponse, HttpError> {
     let expenses: Vec<ExpenseResponse> = service
         .get_user_expenses(user.id)
         .await
@@ -99,7 +100,7 @@ pub(super) async fn expenses_query(
     Extension(user): Extension<AppUser>,
     Query(period): Query<DatePeriod>,
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, StatusCode> {
+) -> Result<impl IntoResponse, HttpError> {
     if !period.is_valid() {
         Err(StatusCode::BAD_REQUEST)?
     }

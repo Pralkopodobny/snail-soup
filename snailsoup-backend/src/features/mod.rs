@@ -4,6 +4,7 @@ use crate::app_state::AppState;
 
 mod auth;
 mod expense;
+mod response;
 mod swagger;
 mod user;
 

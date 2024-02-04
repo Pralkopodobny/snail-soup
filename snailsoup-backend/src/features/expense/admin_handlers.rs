@@ -7,7 +7,10 @@ use axum::{
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::services::expense::{ExpenseService, ExpenseServiceCreateError, ExpenseServiceGetError};
+use crate::{
+    features::response::HttpError,
+    services::expense::{ExpenseService, ExpenseServiceCreateError, ExpenseServiceGetError},
+};
 
 use super::api::{
     CategoryResponse, CreateCategoryRequest, CreateTagRequest, ExpenseResponse,
@@ -27,14 +30,14 @@ use super::api::{
 pub(super) async fn admin_expense_by_id(
     Path(expense_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, StatusCode> {
+) -> Result<impl IntoResponse, HttpError> {
     let expense = service.get_expense(expense_id).await.map_err(|e| match e {
         ExpenseServiceGetError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
     })?;
 
     match expense {
         Some(e) => Ok(Json(FullExpenseResponse::from(e))),
-        None => Err(StatusCode::NOT_FOUND),
+        None => Err(StatusCode::NOT_FOUND)?,
     }
 }
 
@@ -51,7 +54,7 @@ pub(super) async fn admin_expense_by_id(
 pub(super) async fn admin_user_expenses(
     Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, StatusCode> {
+) -> Result<impl IntoResponse, HttpError> {
     let expenses_opt = service
         .get_user_expenses(user_id)
         .await
@@ -81,7 +84,7 @@ pub(super) async fn admin_user_expenses(
 )]
 pub(super) async fn admin_all_expenses(
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, StatusCode> {
+) -> Result<impl IntoResponse, HttpError> {
     let expenses: Vec<ExpenseResponse> = service
         .get_all_expenses()
         .await
@@ -108,7 +111,7 @@ pub(super) async fn admin_all_expenses(
 pub(super) async fn admin_tags_by_user(
     Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, StatusCode> {
+) -> Result<impl IntoResponse, HttpError> {
     let tags_opt = service
         .get_all_tags(user_id)
         .await
@@ -143,7 +146,7 @@ pub(super) async fn admin_tags_by_user(
 pub(super) async fn admin_categories_by_user(
     Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, StatusCode> {
+) -> Result<impl IntoResponse, HttpError> {
     let categories_opt = service
         .get_all_categories(user_id)
         .await
@@ -180,7 +183,7 @@ pub(super) async fn admin_create_category(
     Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
     Json(body): Json<CreateCategoryRequest>,
-) -> Result<impl IntoResponse, StatusCode> {
+) -> Result<impl IntoResponse, HttpError> {
     let new_category = service
         .create_category(user_id, body.name.as_str())
         .await
@@ -208,7 +211,7 @@ pub(super) async fn admin_create_tag(
     Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
     Json(body): Json<CreateTagRequest>,
-) -> Result<impl IntoResponse, StatusCode> {
+) -> Result<impl IntoResponse, HttpError> {
     let new_tag = service
         .create_tag(user_id, body.name.as_str())
         .await

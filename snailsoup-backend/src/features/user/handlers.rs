@@ -9,7 +9,7 @@ use super::api::UserResponse;
     path = "/api/users/me",
     tag = "Users",
     responses(
-        (status = OK, description = "User found successfully", body = UserResponse),
+        (status = StatusCode::OK, description = "User found successfully", body = UserResponse),
     ),
     security(("Bearer token" = []))
 )]

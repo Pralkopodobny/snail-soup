@@ -16,8 +16,8 @@ use super::api::UserResponse;
     path = "/api/admin/users/{user_id}",
     tag = "Users - Admin",
     responses(
-        (status = OK, description = "User found successfully", body = UserResponse),
-        (status = NOT_FOUND, description = "User not found")
+        (status = StatusCode::OK, description = "User found successfully", body = UserResponse),
+        (status = StatusCode::NOT_FOUND, description = "User not found")
     ),
     params(
         ("user_id" = Uuid, Path, description = "User database id to get User for"),
@@ -41,7 +41,7 @@ pub(super) async fn user_by_id(
     path = "/api/admin/users",
     tag = "Users - Admin",
     responses(
-        (status = OK, description = "list users successfully", body = [UserResponse])
+        (status = StatusCode::OK, description = "list users successfully", body = [UserResponse])
     ),
     security(("Bearer token" = []))
 )]

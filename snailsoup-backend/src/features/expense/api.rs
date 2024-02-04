@@ -50,6 +50,7 @@ pub fn get_admin_routes(app_state: AppState) -> Router {
 pub fn get_private_routes(app_state: AppState) -> Router {
     Router::new()
         .route("/api/expenses/:id", get(handlers::expense_by_id))
+        .route("/api/expenses/", get(handlers::expenses))
         .with_state(app_state)
 }
 

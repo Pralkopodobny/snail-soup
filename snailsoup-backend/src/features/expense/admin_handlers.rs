@@ -19,8 +19,8 @@ use super::api::{
     path = "/api/admin/expenses/{expense_id}",
     tag = "Expenses - Admin",
     responses(
-        (status = OK, description = "Expense found successfully", body = FullExpenseResponse),
-        (status = NOT_FOUND, description = "Expense not found")
+        (status = StatusCode::OK, description = "Expense found successfully", body = FullExpenseResponse),
+        (status = StatusCode::NOT_FOUND, description = "Expense not found")
     ),
     security(("Bearer token" = []))
 )]
@@ -43,8 +43,8 @@ pub(super) async fn admin_expense_by_id(
     path = "/api/admin/users/{user_id}/expenses",
     tag = "Expenses - Admin",
     responses(
-        (status = OK, description = "Expense found successfully", body = [ExpenseResponse]),
-        (status = NOT_FOUND, description = "user does not exists")
+        (status = StatusCode::OK, description = "Expense found successfully", body = [ExpenseResponse]),
+        (status = StatusCode::NOT_FOUND, description = "user does not exists")
     ),
     security(("Bearer token" = []))
 )]
@@ -75,7 +75,7 @@ pub(super) async fn admin_user_expenses(
     path = "/api/admin/expenses",
     tag = "Expenses - Admin",
     responses(
-        (status = OK, description = "list expenses successfully", body = [ExpenseResponse])
+        (status = StatusCode::OK, description = "list expenses successfully", body = [ExpenseResponse])
     ),
     security(("Bearer token" = []))
 )]
@@ -100,8 +100,8 @@ pub(super) async fn admin_all_expenses(
     path = "/api/admin/users/{user_id}/tags",
     tag = "Expenses - Admin",
     responses(
-        (status = OK, description = "list tags successfully", body = [TagResponse]),
-        (status = NOT_FOUND, description = "user does not exists")
+        (status = StatusCode::OK, description = "list tags successfully", body = [TagResponse]),
+        (status = StatusCode::NOT_FOUND, description = "user does not exists")
     ),
     security(("Bearer token" = []))
 )]
@@ -135,8 +135,8 @@ pub(super) async fn admin_tags_by_user(
     path = "/api/admin/users/{user_id}/categories",
     tag = "Expenses - Admin",
     responses(
-        (status = OK, description = "list tags successfully", body = [CategoryResponse]),
-        (status = NOT_FOUND, description = "user does not exists")
+        (status = StatusCode::OK, description = "list tags successfully", body = [CategoryResponse]),
+        (status = StatusCode::NOT_FOUND, description = "user does not exists")
     ),
     security(("Bearer token" = []))
 )]
@@ -171,8 +171,8 @@ pub(super) async fn admin_categories_by_user(
     tag = "Expenses - Admin",
     request_body = CreateCategoryRequest,
     responses(
-        (status = CREATED, description = "tag created successfully", body = Uuid),
-        (status = NOT_FOUND, description = "user does not exists")
+        (status = StatusCode::CREATED, description = "tag created successfully", body = Uuid),
+        (status = StatusCode::NOT_FOUND, description = "user does not exists")
     ),
     security(("Bearer token" = []))
 )]
@@ -199,8 +199,8 @@ pub(super) async fn admin_create_category(
     tag = "Expenses - Admin",
     request_body = CreateTagRequest,
     responses(
-        (status = CREATED, description = "tag created successfully", body = Uuid),
-        (status = NOT_FOUND, description = "user does not exists")
+        (status = StatusCode::CREATED, description = "tag created successfully", body = Uuid),
+        (status = StatusCode::NOT_FOUND, description = "user does not exists")
     ),
     security(("Bearer token" = []))
 )]

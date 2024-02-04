@@ -13,7 +13,7 @@ use crate::{
     services::expense::{ExpenseService, ExpenseServiceGetError},
 };
 
-use super::api::FullExpenseResponse;
+use super::api::{ExpenseResponse, FullExpenseResponse};
 
 #[utoipa::path(
     get,
@@ -44,4 +44,31 @@ pub(super) async fn expense_by_id(
         }
         None => Err(StatusCode::NOT_FOUND)?,
     }
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/expenses/",
+    tag = "Expenses",
+    responses(
+        (status = StatusCode::OK, description = "Expense found successfully", body = [ExpenseResponse]),
+    ),
+    security(("Bearer token" = []))
+)]
+pub(super) async fn expenses(
+    Extension(user): Extension<AppUser>,
+    service: State<Arc<ExpenseService>>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let expenses: Vec<ExpenseResponse> = service
+        .get_user_expenses(user.id)
+        .await
+        .map_err(|e| match e {
+            ExpenseServiceGetError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
+        })?
+        .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?
+        .into_iter()
+        .map(|e| ExpenseResponse::from(e))
+        .collect();
+
+    Ok(Json(expenses))
 }

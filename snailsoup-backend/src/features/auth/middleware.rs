@@ -1,8 +1,7 @@
+use axum::http::{header, HeaderMap};
 use std::sync::Arc;
 
-use axum::http::{header, HeaderMap};
-
-use crate::{domain::AppUser, services::auth::AuthService};
+use crate::{domain::app_user::AppUser, services::auth::AuthService};
 
 #[derive(Debug, serde::Serialize)]
 pub struct ErrorResponse {

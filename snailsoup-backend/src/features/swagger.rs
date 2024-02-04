@@ -7,14 +7,15 @@ use utoipa_rapidoc::RapiDoc;
 use utoipa_redoc::{Redoc, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::features::expense::handlers::__path_all_expenses;
-use crate::features::expense::handlers::__path_expense_by_id;
+use crate::features::expense::admin_handlers::{
+    __path_all_expenses, __path_categories_by_user, __path_create_category, __path_create_tag,
+    __path_expense_by_id, __path_tags_by_user, __path_user_expenses,
+};
 
-use crate::features::user::handlers::__path_all_users;
+use crate::features::user::admin_handlers::{__path_all_users, __path_user_by_id};
 use crate::features::user::handlers::__path_me;
-use crate::features::user::handlers::__path_user_by_id;
 
-use crate::features::auth::handlers::__path_login;
+use crate::features::auth::handlers::{__path_login, __path_register};
 
 pub fn get_routes() -> Router {
     Router::new()
@@ -25,9 +26,24 @@ pub fn get_routes() -> Router {
 
 #[derive(OpenApi)]
 #[openapi(
-            paths(all_expenses, expense_by_id, all_users, user_by_id, login, me),
+            paths(
+                login, register, //Auth
+                all_expenses, expense_by_id, tags_by_user, categories_by_user, create_category, create_tag, user_expenses, //Admin - Expenses
+                all_users, user_by_id, //Admin - User
+                me //User
+            ),
             components(
-                schemas(super::expense::api::ExpenseResponse, super::user::api::UserResponse, super::auth::api::LoginRequest)
+                schemas(
+                    super::expense::api::ExpenseResponse,
+                    super::expense::api::FullExpenseResponse,
+                    super::expense::api::CategoryResponse,
+                    super::expense::api::TagResponse,
+                    super::expense::api::CreateTagRequest,
+                    super::expense::api::CreateCategoryRequest,
+                    super::user::api::UserResponse,
+                    super::auth::api::LoginRequest,
+                    super::auth::api::RegisterRequest
+                )
             ),
             modifiers(&SecurityAddon),
             tags(

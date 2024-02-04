@@ -1,5 +1,6 @@
-use crate::app_state::AppState;
 use axum::Router;
+
+use crate::app_state::AppState;
 
 mod auth;
 mod expense;

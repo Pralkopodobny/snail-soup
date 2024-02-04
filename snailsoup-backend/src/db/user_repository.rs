@@ -1,7 +1,7 @@
-use sqlx::Pool;
-use sqlx::Postgres;
+use sqlx::{Pool, Postgres};
+use uuid::Uuid;
 
-use crate::domain::AppUser;
+use crate::domain::app_user::AppUser;
 
 #[derive(Clone)]
 pub struct AppUserRepository {
@@ -13,11 +13,13 @@ impl AppUserRepository {
         AppUserRepository { pool: pool }
     }
 
-    pub async fn get(&self, id: uuid::Uuid) -> Result<Option<AppUser>, sqlx::Error> {
+    pub async fn get(&self, id: Uuid) -> Result<Option<AppUser>, sqlx::Error> {
         let user = sqlx::query_as!(
             AppUser,
             "
-            SELECT * FROM app_users WHERE id = $1
+            SELECT * 
+            FROM app_users 
+            WHERE id = $1
             ",
             id
         )
@@ -26,11 +28,31 @@ impl AppUserRepository {
         Ok(user)
     }
 
+    pub async fn insert(&self, user: AppUser) -> Result<AppUser, sqlx::Error> {
+        let created_user = sqlx::query_as!(
+            AppUser,
+            "
+        INSERT INTO app_users(id, username, password_hash, account_role) 
+        VALUES ($1, $2, $3, $4) 
+        RETURNING id, username, password_hash, account_role
+        ",
+            user.id,
+            user.username,
+            user.password_hash,
+            user.account_role
+        )
+        .fetch_one(&self.pool)
+        .await?;
+        Ok(created_user)
+    }
+
     pub async fn get_by_name(&self, username: &str) -> Result<Option<AppUser>, sqlx::Error> {
         let user = sqlx::query_as!(
             AppUser,
             "
-            SELECT * FROM app_users WHERE username = $1
+            SELECT * 
+            FROM app_users 
+            WHERE username = $1
             ",
             username
         )
@@ -43,7 +65,8 @@ impl AppUserRepository {
         let users = sqlx::query_as!(
             AppUser,
             "
-            SELECT * FROM app_users
+            SELECT * 
+            FROM app_users
             "
         )
         .fetch_all(&self.pool)

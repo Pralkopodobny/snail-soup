@@ -1,24 +1,47 @@
-use axum::{routing::get, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use uuid::Uuid;
 
-use super::handlers::{all_expenses, expense_by_id};
-use crate::{app_state::AppState, domain};
+use crate::{
+    app_state::AppState,
+    domain::expense::{Expense, FullExpense},
+};
 
-//TODO: secure them
+use super::admin_handlers::{
+    all_expenses, categories_by_user, create_category, create_tag, expense_by_id, tags_by_user,
+    user_expenses,
+};
+
 pub fn get_admin_routes(app_state: AppState) -> Router {
     Router::new()
         .route("/api/admin/expenses", get(all_expenses))
         .route("/api/admin/expenses/:expense_id", get(expense_by_id))
+        .route("/api/admin/users/:user_id/tags", get(tags_by_user))
+        .route(
+            "/api/admin/users/:user_id/categories",
+            get(categories_by_user),
+        )
+        .route(
+            "/api/admin/users/:user_id/categories",
+            post(create_category),
+        )
+        .route("/api/admin/users/:user_id/tags", post(create_tag))
+        .route("/api/admin/users/:user_id/expenses", get(user_expenses))
         .with_state(app_state)
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
 pub struct ExpenseResponse {
     #[schema()]
-    pub id: uuid::Uuid,
+    pub id: Uuid,
     #[schema()]
-    pub user_id: uuid::Uuid,
+    pub user: Uuid,
+    #[schema()]
+    pub category: Option<Uuid>,
     #[schema()]
     pub description: Option<String>,
     #[schema()]
@@ -27,14 +50,75 @@ pub struct ExpenseResponse {
     pub cost: rust_decimal::Decimal,
 }
 
-impl ExpenseResponse {
-    pub fn from_expense(expense: domain::Expense) -> ExpenseResponse {
+#[derive(Serialize, Deserialize, ToSchema, Clone)]
+pub struct FullExpenseResponse {
+    #[schema()]
+    pub id: Uuid,
+    #[schema()]
+    pub user: Uuid,
+    #[schema()]
+    pub category: Option<Uuid>,
+    #[schema()]
+    pub tags: Vec<Uuid>,
+    #[schema()]
+    pub description: Option<String>,
+    #[schema()]
+    pub expense_date: chrono::NaiveDate,
+    #[schema()]
+    pub cost: rust_decimal::Decimal,
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Clone)]
+pub struct CategoryResponse {
+    #[schema()]
+    pub id: Uuid,
+    #[schema()]
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Clone)]
+pub struct CreateCategoryRequest {
+    #[schema()]
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Clone)]
+pub struct CreateTagRequest {
+    #[schema()]
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Clone)]
+pub struct TagResponse {
+    #[schema()]
+    pub id: Uuid,
+    #[schema()]
+    pub name: String,
+}
+
+impl From<FullExpense> for FullExpenseResponse {
+    fn from(value: FullExpense) -> Self {
+        FullExpenseResponse {
+            id: value.expense.id,
+            user: value.expense.user_id,
+            category: value.expense.category_id,
+            tags: value.tags_ids,
+            description: value.expense.description,
+            expense_date: value.expense.expense_date,
+            cost: value.expense.cost,
+        }
+    }
+}
+
+impl From<Expense> for ExpenseResponse {
+    fn from(value: Expense) -> Self {
         ExpenseResponse {
-            id: expense.id,
-            user_id: expense.user_id,
-            description: expense.description,
-            expense_date: expense.expense_date,
-            cost: expense.cost,
+            id: value.id,
+            user: value.user_id,
+            category: value.category_id,
+            description: value.description,
+            expense_date: value.expense_date,
+            cost: value.cost,
         }
     }
 }

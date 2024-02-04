@@ -1,10 +1,9 @@
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use std::sync::Arc;
 
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
+use crate::services::auth::{AuthService, LoginError, RegisterError};
 
-use crate::services::auth::{AuthService, LoginError};
-
-use super::api::LoginRequest;
+use super::api::{LoginRequest, RegisterRequest};
 
 #[utoipa::path(
     post,
@@ -12,8 +11,8 @@ use super::api::LoginRequest;
     tag = "Auth",
     request_body = LoginRequest,
     responses(
-        (status = 200, description = "list expenses successfully"),
-        (status = 401, description = "user with such username and password does not exist"),
+        (status = OK, description = "list expenses successfully"),
+        (status = UNAUTHORIZED, description = "user with such username and password does not exist"),
     )
 )]
 pub(super) async fn login(
@@ -30,10 +29,33 @@ pub(super) async fn login(
             LoginError::IncorrectPassword => Err(StatusCode::UNAUTHORIZED),
             LoginError::InternalError => Err(StatusCode::INTERNAL_SERVER_ERROR),
             LoginError::UnexpectedError => Err(StatusCode::INTERNAL_SERVER_ERROR),
-            LoginError::InternalPasswordError => {
-                println!("xd");
-                Err(StatusCode::INTERNAL_SERVER_ERROR)
-            }
+            LoginError::InternalPasswordError => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        },
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/auth/register",
+    tag = "Auth",
+    request_body = RegisterRequest,
+    responses(
+        (status = CREATED, description = "user registered", body=Uuid),
+        (status = BAD_REQUEST, description = "username already in use")
+    )
+)]
+pub(super) async fn register(
+    State(service): State<Arc<AuthService>>,
+    Json(body): Json<RegisterRequest>,
+) -> Result<impl IntoResponse, StatusCode> {
+    match service
+        .register(body.username.as_str(), body.password.as_str())
+        .await
+    {
+        Ok(u) => Ok((StatusCode::CREATED, Json(u.id)).into_response()),
+        Err(e) => match e {
+            RegisterError::UsernameInUse => Err(StatusCode::BAD_REQUEST),
+            RegisterError::InternalError => Err(StatusCode::INTERNAL_SERVER_ERROR),
         },
     }
 }

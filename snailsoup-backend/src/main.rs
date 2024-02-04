@@ -10,10 +10,11 @@ use std::sync::Arc;
 use dotenv::dotenv;
 use sqlx::postgres::PgPoolOptions;
 
-use crate::app_state::AppState;
-use crate::config::Config;
-use crate::services::auth::AuthService;
-use crate::services::{ExpenseService, UserService};
+use crate::{
+    app_state::AppState,
+    config::Config,
+    services::{auth::AuthService, expense::ExpenseService, user::UserService},
+};
 
 #[tokio::main]
 async fn main() {
@@ -42,7 +43,10 @@ async fn main() {
         config.clone(),
         Arc::new(AuthService::new(app_user_repo.clone(), config.clone())),
         Arc::new(UserService::new(app_user_repo.clone())),
-        Arc::new(ExpenseService::new(expense_repository.clone())),
+        Arc::new(ExpenseService::new(
+            expense_repository.clone(),
+            app_user_repo.clone(),
+        )),
     );
 
     let app = features::get_routes(app_state);

@@ -1,10 +1,12 @@
 use axum::{routing::get, Router};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use uuid::Uuid;
 
-use crate::{app_state::AppState, domain};
+use crate::{app_state::AppState, domain::app_user::AppUser};
 
-use super::handlers::{all_users, me, user_by_id};
+use super::admin_handlers::{all_users, user_by_id};
+use super::handlers::me;
 
 pub fn get_admin_routes(app_state: AppState) -> Router {
     Router::new()
@@ -22,7 +24,7 @@ pub fn get_private_routes(app_state: AppState) -> Router {
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
 pub struct UserResponse {
     #[schema()]
-    pub id: uuid::Uuid,
+    pub id: Uuid,
     #[schema()]
     pub username: String,
     #[schema()]
@@ -30,7 +32,7 @@ pub struct UserResponse {
 }
 
 impl UserResponse {
-    pub fn from_user(user: domain::AppUser) -> UserResponse {
+    pub fn from_user(user: AppUser) -> UserResponse {
         UserResponse {
             id: user.id,
             username: user.username,

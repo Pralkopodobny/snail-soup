@@ -11,26 +11,45 @@ use crate::{
     domain::expense::{Expense, FullExpense},
 };
 
-use super::admin_handlers::{
-    all_expenses, categories_by_user, create_category, create_tag, expense_by_id, tags_by_user,
-    user_expenses,
-};
+use super::admin_handlers;
+use super::handlers;
 
 pub fn get_admin_routes(app_state: AppState) -> Router {
     Router::new()
-        .route("/api/admin/expenses", get(all_expenses))
-        .route("/api/admin/expenses/:expense_id", get(expense_by_id))
-        .route("/api/admin/users/:user_id/tags", get(tags_by_user))
         .route(
-            "/api/admin/users/:user_id/categories",
-            get(categories_by_user),
+            "/api/admin/expenses",
+            get(admin_handlers::admin_all_expenses),
+        )
+        .route(
+            "/api/admin/expenses/:expense_id",
+            get(admin_handlers::admin_expense_by_id),
+        )
+        .route(
+            "/api/admin/users/:user_id/tags",
+            get(admin_handlers::admin_tags_by_user),
         )
         .route(
             "/api/admin/users/:user_id/categories",
-            post(create_category),
+            get(admin_handlers::admin_categories_by_user),
         )
-        .route("/api/admin/users/:user_id/tags", post(create_tag))
-        .route("/api/admin/users/:user_id/expenses", get(user_expenses))
+        .route(
+            "/api/admin/users/:user_id/categories",
+            post(admin_handlers::admin_create_category),
+        )
+        .route(
+            "/api/admin/users/:user_id/tags",
+            post(admin_handlers::admin_create_tag),
+        )
+        .route(
+            "/api/admin/users/:user_id/expenses",
+            get(admin_handlers::admin_user_expenses),
+        )
+        .with_state(app_state)
+}
+
+pub fn get_private_routes(app_state: AppState) -> Router {
+    Router::new()
+        .route("/api/expenses/:id", get(handlers::expense_by_id))
         .with_state(app_state)
 }
 

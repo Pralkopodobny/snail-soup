@@ -24,7 +24,7 @@ use super::api::{
     ),
     security(("Bearer token" = []))
 )]
-pub(super) async fn expense_by_id(
+pub(super) async fn admin_expense_by_id(
     Path(expense_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
 ) -> Result<impl IntoResponse, StatusCode> {
@@ -48,7 +48,7 @@ pub(super) async fn expense_by_id(
     ),
     security(("Bearer token" = []))
 )]
-pub(super) async fn user_expenses(
+pub(super) async fn admin_user_expenses(
     Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
 ) -> Result<impl IntoResponse, StatusCode> {
@@ -79,7 +79,7 @@ pub(super) async fn user_expenses(
     ),
     security(("Bearer token" = []))
 )]
-pub(super) async fn all_expenses(
+pub(super) async fn admin_all_expenses(
     service: State<Arc<ExpenseService>>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let expenses: Vec<ExpenseResponse> = service
@@ -105,7 +105,7 @@ pub(super) async fn all_expenses(
     ),
     security(("Bearer token" = []))
 )]
-pub(super) async fn tags_by_user(
+pub(super) async fn admin_tags_by_user(
     Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
 ) -> Result<impl IntoResponse, StatusCode> {
@@ -140,7 +140,7 @@ pub(super) async fn tags_by_user(
     ),
     security(("Bearer token" = []))
 )]
-pub(super) async fn categories_by_user(
+pub(super) async fn admin_categories_by_user(
     Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
 ) -> Result<impl IntoResponse, StatusCode> {
@@ -176,7 +176,7 @@ pub(super) async fn categories_by_user(
     ),
     security(("Bearer token" = []))
 )]
-pub(super) async fn create_category(
+pub(super) async fn admin_create_category(
     Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
     Json(body): Json<CreateCategoryRequest>,
@@ -204,7 +204,7 @@ pub(super) async fn create_category(
     ),
     security(("Bearer token" = []))
 )]
-pub(super) async fn create_tag(
+pub(super) async fn admin_create_tag(
     Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
     Json(body): Json<CreateTagRequest>,

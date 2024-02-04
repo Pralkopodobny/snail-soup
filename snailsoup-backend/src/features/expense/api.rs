@@ -11,7 +11,7 @@ use crate::{
     domain::expense::{Expense, FullExpense},
 };
 
-use super::handlers::{
+use super::admin_handlers::{
     all_expenses, categories_by_user, create_category, create_tag, expense_by_id, tags_by_user,
     user_expenses,
 };

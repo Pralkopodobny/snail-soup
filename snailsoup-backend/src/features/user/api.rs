@@ -5,7 +5,8 @@ use uuid::Uuid;
 
 use crate::{app_state::AppState, domain::app_user::AppUser};
 
-use super::handlers::{all_users, me, user_by_id};
+use super::admin_handlers::{all_users, user_by_id};
+use super::handlers::me;
 
 pub fn get_admin_routes(app_state: AppState) -> Router {
     Router::new()

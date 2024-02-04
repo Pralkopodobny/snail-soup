@@ -22,7 +22,7 @@ use super::api::FullExpenseResponse;
     responses(
         (status = StatusCode::OK, description = "Expense found successfully", body = FullExpenseResponse),
         (status = StatusCode::NOT_FOUND, description = "Expense not found"),
-        (status = StatusCode::FORBIDDEN, description = "Expense not found"),
+        (status = StatusCode::FORBIDDEN, description = "Not sufficient permissions"),
     ),
     security(("Bearer token" = []))
 )]

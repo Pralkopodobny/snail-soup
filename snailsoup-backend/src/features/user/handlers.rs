@@ -13,14 +13,14 @@ use super::api::UserResponse;
 
 #[utoipa::path(
     get,
-    path = "/api/admin/users/{id}",
+    path = "/api/admin/users/{user_id}",
     tag = "Users - Admin",
     responses(
         (status = OK, description = "User found successfully", body = UserResponse),
         (status = NOT_FOUND, description = "User not found")
     ),
     params(
-        ("id" = Uuid, Path, description = "User database id to get User for"),
+        ("user_id" = Uuid, Path, description = "User database id to get User for"),
     ),
     security(("Bearer token" = []))
 )]

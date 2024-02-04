@@ -13,6 +13,7 @@ use crate::{
 
 use super::handlers::{
     all_expenses, categories_by_user, create_category, create_tag, expense_by_id, tags_by_user,
+    user_expenses,
 };
 
 pub fn get_admin_routes(app_state: AppState) -> Router {
@@ -29,6 +30,7 @@ pub fn get_admin_routes(app_state: AppState) -> Router {
             post(create_category),
         )
         .route("/api/admin/users/:user_id/tags", post(create_tag))
+        .route("/api/admin/users/:user_id/expenses", get(user_expenses))
         .with_state(app_state)
 }
 

@@ -16,14 +16,11 @@ use super::api::{
 
 #[utoipa::path(
     get,
-    path = "/api/admin/expenses/{id}",
+    path = "/api/admin/expenses/{expense_id}",
     tag = "Expenses - Admin",
     responses(
         (status = OK, description = "Expense found successfully", body = FullExpenseResponse),
         (status = NOT_FOUND, description = "Expense not found")
-    ),
-    params(
-        ("id" = Uuid, Path, description = "Expense database id to get Expense for"),
     ),
     security(("Bearer token" = []))
 )]
@@ -39,6 +36,38 @@ pub(super) async fn expense_by_id(
         Some(e) => Ok(Json(FullExpenseResponse::from(e))),
         None => Err(StatusCode::NOT_FOUND),
     }
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/admin/users/{user_id}/expenses",
+    tag = "Expenses - Admin",
+    responses(
+        (status = OK, description = "Expense found successfully", body = [ExpenseResponse]),
+        (status = NOT_FOUND, description = "user does not exists")
+    ),
+    security(("Bearer token" = []))
+)]
+pub(super) async fn user_expenses(
+    Path(user_id): Path<Uuid>,
+    service: State<Arc<ExpenseService>>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let expenses_opt = service
+        .get_user_expenses(user_id)
+        .await
+        .map_err(|e| match e {
+            ExpenseServiceGetError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
+        })?;
+
+    let expenses: Vec<ExpenseResponse> = match expenses_opt {
+        None => Err(StatusCode::NOT_FOUND)?,
+        Some(expenses) => expenses
+            .into_iter()
+            .map(|e| ExpenseResponse::from(e))
+            .collect(),
+    };
+
+    Ok(Json(expenses))
 }
 
 #[utoipa::path(

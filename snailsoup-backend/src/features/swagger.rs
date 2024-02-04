@@ -9,7 +9,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::features::expense::handlers::{
     __path_all_expenses, __path_categories_by_user, __path_create_category, __path_create_tag,
-    __path_expense_by_id, __path_tags_by_user,
+    __path_expense_by_id, __path_tags_by_user, __path_user_expenses,
 };
 
 use crate::features::user::handlers::{__path_all_users, __path_me, __path_user_by_id};
@@ -27,7 +27,7 @@ pub fn get_routes() -> Router {
 #[openapi(
             paths(
                 login, register,
-                all_expenses, expense_by_id, tags_by_user, categories_by_user, create_category, create_tag,
+                all_expenses, expense_by_id, tags_by_user, categories_by_user, create_category, create_tag, user_expenses,
                 all_users, user_by_id, me
             ),
             components(

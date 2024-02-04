@@ -60,6 +60,25 @@ impl ExpenseRepository {
         Ok(expenses)
     }
 
+    pub async fn get_all_expenses_by_user_id(
+        &self,
+        user_id: Uuid,
+    ) -> Result<Vec<Expense>, sqlx::Error> {
+        let expenses = sqlx::query_as!(
+            Expense,
+            "
+            SELECT *
+            FROM expenses
+            WHERE user_id = $1
+            ",
+            user_id
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(expenses)
+    }
+
     pub async fn get_all_tags_by_user_id(&self, user_id: Uuid) -> Result<Vec<Tag>, sqlx::Error> {
         let tags = sqlx::query_as!(
             Tag,

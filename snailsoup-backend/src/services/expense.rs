@@ -51,6 +51,28 @@ impl ExpenseService {
             .map_err(|_| ExpenseServiceGetError::InternalServerError)?)
     }
 
+    pub async fn get_user_expenses(
+        &self,
+        user_id: Uuid,
+    ) -> Result<Option<Vec<Expense>>, ExpenseServiceGetError> {
+        let user = self
+            .user_repository
+            .get(user_id)
+            .await
+            .map_err(|_| ExpenseServiceGetError::InternalServerError)?;
+        if user.is_none() {
+            return Ok(None);
+        }
+
+        let expenses = self
+            .expense_repository
+            .get_all_expenses_by_user_id(user_id)
+            .await
+            .map_err(|_| ExpenseServiceGetError::InternalServerError)?;
+
+        Ok(Some(expenses))
+    }
+
     pub async fn get_all_tags(
         &self,
         user_id: Uuid,

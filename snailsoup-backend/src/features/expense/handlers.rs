@@ -12,10 +12,10 @@ use crate::{
     domain::app_user::AppUser,
     features::response::HttpError,
     services::expense::{ExpenseService, ExpenseServiceGetError},
-    utils::period::DatePeriod,
+    utils::{convert_to_vec, period::DatePeriod},
 };
 
-use super::api::{ExpenseResponse, FullExpenseResponse};
+use super::api::{ExpenseResponse, FullExpenseResponse, TagResponse};
 
 #[utoipa::path(
     get,
@@ -117,4 +117,34 @@ pub(super) async fn expenses_query(
         .collect();
 
     Ok(Json(expenses))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/expense-tags/",
+    tag = "Expenses",
+    responses(
+        (status = StatusCode::OK, description = "Expense found successfully", body = [TagResponse]),
+    ),
+    security(("Bearer token" = []))
+)]
+pub(super) async fn tags(
+    Extension(user): Extension<AppUser>,
+    service: State<Arc<ExpenseService>>,
+) -> Result<Json<Vec<TagResponse>>, HttpError> {
+    service
+        .get_all_tags(user.id)
+        .await
+        .map_err(|err| match err {
+            ExpenseServiceGetError::InternalServerError => {
+                HttpError::from(StatusCode::INTERNAL_SERVER_ERROR)
+            }
+        })?
+        .ok_or(HttpError::from(StatusCode::INTERNAL_SERVER_ERROR))
+        .map(|tags| {
+            Json(convert_to_vec(tags, |t| TagResponse {
+                id: t.id,
+                name: t.name,
+            }))
+        })
 }

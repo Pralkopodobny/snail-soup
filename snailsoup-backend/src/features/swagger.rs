@@ -13,7 +13,7 @@ use crate::features::expense::admin_handlers::{
     __path_admin_user_expenses,
 };
 use crate::features::expense::handlers::{
-    __path_expense_by_id, __path_expenses, __path_expenses_query,
+    __path_expense_by_id, __path_expenses, __path_expenses_query, __path_tags,
 };
 
 use crate::features::user::admin_handlers::{__path_all_users, __path_user_by_id};
@@ -33,7 +33,7 @@ pub fn get_routes() -> Router {
             paths(
                 login, register, //Auth
                 admin_all_expenses, admin_expense_by_id, admin_tags_by_user, admin_categories_by_user, admin_create_category, admin_create_tag, admin_user_expenses, //Admin - Expenses
-                expense_by_id, expenses, expenses_query, //Expenses
+                expense_by_id, expenses, expenses_query, tags, //Expenses
                 all_users, user_by_id, //Admin - User
                 me //User
             ),

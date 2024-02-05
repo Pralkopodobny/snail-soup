@@ -1,7 +1,6 @@
 use axum::{
     extract::{Path, State},
     http::StatusCode,
-    response::IntoResponse,
     Json,
 };
 use std::sync::Arc;
@@ -10,7 +9,10 @@ use uuid::Uuid;
 use crate::{
     features::response::HttpError,
     services::expense::{ExpenseService, ExpenseServiceCreateError, ExpenseServiceGetError},
+    utils::convert_to_vec,
 };
+type GetError = ExpenseServiceGetError;
+type CreateError = ExpenseServiceCreateError;
 
 use super::api::{
     CategoryResponse, CreateCategoryRequest, CreateTagRequest, ExpenseResponse,
@@ -30,15 +32,15 @@ use super::api::{
 pub(super) async fn admin_expense_by_id(
     Path(expense_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, HttpError> {
-    let expense = service.get_expense(expense_id).await.map_err(|e| match e {
-        ExpenseServiceGetError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
-    })?;
-
-    match expense {
-        Some(e) => Ok(Json(FullExpenseResponse::from(e))),
-        None => Err(StatusCode::NOT_FOUND)?,
-    }
+) -> Result<Json<FullExpenseResponse>, HttpError> {
+    service
+        .get_expense(expense_id)
+        .await
+        .map_err(|e| match e {
+            GetError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
+        })?
+        .ok_or(HttpError::from(StatusCode::NOT_FOUND))
+        .map(|expense| Json(FullExpenseResponse::from(expense)))
 }
 
 #[utoipa::path(
@@ -54,23 +56,15 @@ pub(super) async fn admin_expense_by_id(
 pub(super) async fn admin_user_expenses(
     Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, HttpError> {
-    let expenses_opt = service
+) -> Result<Json<Vec<ExpenseResponse>>, HttpError> {
+    service
         .get_user_expenses(user_id)
         .await
         .map_err(|e| match e {
-            ExpenseServiceGetError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
-        })?;
-
-    let expenses: Vec<ExpenseResponse> = match expenses_opt {
-        None => Err(StatusCode::NOT_FOUND)?,
-        Some(expenses) => expenses
-            .into_iter()
-            .map(|e| ExpenseResponse::from(e))
-            .collect(),
-    };
-
-    Ok(Json(expenses))
+            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+        })?
+        .ok_or(HttpError::from(StatusCode::NOT_FOUND))
+        .map(|expenses| Json(convert_to_vec(expenses, |e| ExpenseResponse::from(e))))
 }
 
 #[utoipa::path(
@@ -84,18 +78,14 @@ pub(super) async fn admin_user_expenses(
 )]
 pub(super) async fn admin_all_expenses(
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, HttpError> {
-    let expenses: Vec<ExpenseResponse> = service
+) -> Result<Json<Vec<ExpenseResponse>>, HttpError> {
+    service
         .get_all_expenses()
         .await
         .map_err(|e| match e {
-            ExpenseServiceGetError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
-        })?
-        .into_iter()
-        .map(|e| ExpenseResponse::from(e))
-        .collect();
-
-    Ok(Json(expenses))
+            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+        })
+        .map(|expenses| Json(convert_to_vec(expenses, |e| ExpenseResponse::from(e))))
 }
 
 #[utoipa::path(
@@ -111,26 +101,20 @@ pub(super) async fn admin_all_expenses(
 pub(super) async fn admin_tags_by_user(
     Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, HttpError> {
-    let tags_opt = service
+) -> Result<Json<Vec<TagResponse>>, HttpError> {
+    service
         .get_all_tags(user_id)
         .await
         .map_err(|err| match err {
-            ExpenseServiceGetError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
-        })?;
-
-    let tags: Vec<TagResponse> = match tags_opt {
-        None => Err(StatusCode::NOT_FOUND)?,
-        Some(tags) => tags
-            .into_iter()
-            .map(|t| TagResponse {
+            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+        })?
+        .ok_or(HttpError::from(StatusCode::NOT_FOUND))
+        .map(|tags| {
+            Json(convert_to_vec(tags, |t| TagResponse {
                 id: t.id,
                 name: t.name,
-            })
-            .collect(),
-    };
-
-    Ok(Json(tags))
+            }))
+        })
 }
 
 #[utoipa::path(
@@ -146,26 +130,20 @@ pub(super) async fn admin_tags_by_user(
 pub(super) async fn admin_categories_by_user(
     Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, HttpError> {
-    let categories_opt = service
+) -> Result<Json<Vec<CategoryResponse>>, HttpError> {
+    service
         .get_all_categories(user_id)
         .await
         .map_err(|err| match err {
-            ExpenseServiceGetError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
-        })?;
-
-    let categories: Vec<CategoryResponse> = match categories_opt {
-        None => Err(StatusCode::NOT_FOUND)?,
-        Some(tags) => tags
-            .into_iter()
-            .map(|t| CategoryResponse {
-                id: t.id,
-                name: t.name,
-            })
-            .collect(),
-    };
-
-    Ok(Json(categories))
+            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+        })?
+        .ok_or(HttpError::from(StatusCode::NOT_FOUND))
+        .map(|categories| {
+            Json(convert_to_vec(categories, |c| CategoryResponse {
+                id: c.id,
+                name: c.name,
+            }))
+        })
 }
 
 #[utoipa::path(
@@ -183,17 +161,16 @@ pub(super) async fn admin_create_category(
     Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
     Json(body): Json<CreateCategoryRequest>,
-) -> Result<impl IntoResponse, HttpError> {
-    let new_category = service
+) -> Result<Json<Uuid>, HttpError> {
+    service
         .create_category(user_id, body.name.as_str())
         .await
         .map_err(|e| match e {
-            ExpenseServiceCreateError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
-            ExpenseServiceCreateError::NoUser => StatusCode::NOT_FOUND,
-            ExpenseServiceCreateError::ValidationError(_) => StatusCode::BAD_REQUEST,
-        })?;
-
-    Ok(Json(new_category))
+            CreateError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+            CreateError::NoUser => HttpError::from(StatusCode::NOT_FOUND),
+            CreateError::Validation(m) => HttpError::from((StatusCode::BAD_REQUEST, m.as_str())),
+        })
+        .map(|id| Json(id))
 }
 
 #[utoipa::path(
@@ -211,15 +188,14 @@ pub(super) async fn admin_create_tag(
     Path(user_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
     Json(body): Json<CreateTagRequest>,
-) -> Result<impl IntoResponse, HttpError> {
-    let new_tag = service
+) -> Result<Json<Uuid>, HttpError> {
+    service
         .create_tag(user_id, body.name.as_str())
         .await
         .map_err(|e| match e {
-            ExpenseServiceCreateError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
-            ExpenseServiceCreateError::NoUser => StatusCode::NOT_FOUND,
-            ExpenseServiceCreateError::ValidationError(_) => StatusCode::BAD_REQUEST,
-        })?;
-
-    Ok(Json(new_tag))
+            CreateError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+            CreateError::NoUser => HttpError::from(StatusCode::NOT_FOUND),
+            CreateError::Validation(m) => HttpError::from((StatusCode::BAD_REQUEST, m.as_str())),
+        })
+        .map(|id| Json(id))
 }

@@ -3,7 +3,6 @@ use std::sync::Arc;
 use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
-    response::IntoResponse,
     Extension, Json,
 };
 use uuid::Uuid;
@@ -14,6 +13,8 @@ use crate::{
     services::expense::{ExpenseService, ExpenseServiceGetError},
     utils::{convert_to_vec, period::DatePeriod},
 };
+
+type GetError = ExpenseServiceGetError;
 
 use super::api::{ExpenseResponse, FullExpenseResponse, TagResponse};
 
@@ -32,9 +33,9 @@ pub(super) async fn expense_by_id(
     Extension(user): Extension<AppUser>,
     Path(expense_id): Path<Uuid>,
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, HttpError> {
+) -> Result<Json<FullExpenseResponse>, HttpError> {
     let expense = service.get_expense(expense_id).await.map_err(|e| match e {
-        ExpenseServiceGetError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
+        GetError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
     })?;
 
     match expense {
@@ -60,19 +61,15 @@ pub(super) async fn expense_by_id(
 pub(super) async fn expenses(
     Extension(user): Extension<AppUser>,
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, HttpError> {
-    let expenses: Vec<ExpenseResponse> = service
+) -> Result<Json<Vec<ExpenseResponse>>, HttpError> {
+    service
         .get_user_expenses(user.id)
         .await
         .map_err(|e| match e {
-            ExpenseServiceGetError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
+            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
         })?
-        .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?
-        .into_iter()
-        .map(|e| ExpenseResponse::from(e))
-        .collect();
-
-    Ok(Json(expenses))
+        .ok_or(HttpError::from(StatusCode::INTERNAL_SERVER_ERROR))
+        .map(|expenses| Json(convert_to_vec(expenses, |e| ExpenseResponse::from(e))))
 }
 
 #[utoipa::path(
@@ -100,23 +97,19 @@ pub(super) async fn expenses_query(
     Extension(user): Extension<AppUser>,
     Query(period): Query<DatePeriod>,
     service: State<Arc<ExpenseService>>,
-) -> Result<impl IntoResponse, HttpError> {
+) -> Result<Json<Vec<ExpenseResponse>>, HttpError> {
     if !period.is_valid() {
         Err(StatusCode::BAD_REQUEST)?
     }
 
-    let expenses: Vec<ExpenseResponse> = service
+    service
         .get_user_expenses_in_period(user.id, period)
         .await
         .map_err(|e| match e {
-            ExpenseServiceGetError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
+            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
         })?
-        .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?
-        .into_iter()
-        .map(|e| ExpenseResponse::from(e))
-        .collect();
-
-    Ok(Json(expenses))
+        .ok_or(HttpError::from(StatusCode::INTERNAL_SERVER_ERROR))
+        .map(|expenses| Json(convert_to_vec(expenses, |e| ExpenseResponse::from(e))))
 }
 
 #[utoipa::path(
@@ -136,9 +129,7 @@ pub(super) async fn tags(
         .get_all_tags(user.id)
         .await
         .map_err(|err| match err {
-            ExpenseServiceGetError::InternalServerError => {
-                HttpError::from(StatusCode::INTERNAL_SERVER_ERROR)
-            }
+            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
         })?
         .ok_or(HttpError::from(StatusCode::INTERNAL_SERVER_ERROR))
         .map(|tags| {

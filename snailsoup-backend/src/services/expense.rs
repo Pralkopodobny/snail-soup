@@ -17,9 +17,9 @@ pub enum ExpenseServiceGetError {
 }
 
 pub enum ExpenseServiceCreateError {
-    InternalServerError,
+    Internal,
     NoUser,
-    ValidationError(String),
+    Validation(String),
 }
 
 impl ExpenseService {
@@ -128,7 +128,7 @@ impl ExpenseService {
             .user_repository
             .get(user_id)
             .await
-            .map_err(|_| ExpenseServiceCreateError::InternalServerError)?;
+            .map_err(|_| ExpenseServiceCreateError::Internal)?;
 
         if user.is_none() {
             return Err(ExpenseServiceCreateError::NoUser);
@@ -143,7 +143,7 @@ impl ExpenseService {
         self.expense_repository
             .insert_tag(new_tag)
             .await
-            .map_err(|_| ExpenseServiceCreateError::InternalServerError)
+            .map_err(|_| ExpenseServiceCreateError::Internal)
     }
 
     pub async fn get_all_categories(
@@ -177,7 +177,7 @@ impl ExpenseService {
             .user_repository
             .get(user_id)
             .await
-            .map_err(|_| ExpenseServiceCreateError::InternalServerError)?;
+            .map_err(|_| ExpenseServiceCreateError::Internal)?;
 
         if user.is_none() {
             return Err(ExpenseServiceCreateError::NoUser);
@@ -192,6 +192,6 @@ impl ExpenseService {
         self.expense_repository
             .insert_category(new_category)
             .await
-            .map_err(|_| ExpenseServiceCreateError::InternalServerError)
+            .map_err(|_| ExpenseServiceCreateError::Internal)
     }
 }

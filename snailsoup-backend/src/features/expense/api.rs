@@ -53,6 +53,7 @@ pub fn get_private_routes(app_state: AppState) -> Router {
         .route("/api/expenses/", get(handlers::expenses))
         .route("/api/expenses/query/", get(handlers::expenses_query))
         .route("/api/expense-tags/", get(handlers::tags))
+        .route("/api/expense-categories/", get(handlers::categories))
         .with_state(app_state)
 }
 

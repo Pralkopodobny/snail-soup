@@ -16,7 +16,7 @@ use crate::{
 
 type GetError = ExpenseServiceGetError;
 
-use super::api::{ExpenseResponse, FullExpenseResponse, TagResponse};
+use super::api::{CategoryResponse, ExpenseResponse, FullExpenseResponse, TagResponse};
 
 #[utoipa::path(
     get,
@@ -134,6 +134,34 @@ pub(super) async fn tags(
         .ok_or(HttpError::from(StatusCode::INTERNAL_SERVER_ERROR))
         .map(|tags| {
             Json(convert_to_vec(tags, |t| TagResponse {
+                id: t.id,
+                name: t.name,
+            }))
+        })
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/expense-categories/",
+    tag = "Expenses",
+    responses(
+        (status = StatusCode::OK, description = "Expense found successfully", body = [CategoryResponse]),
+    ),
+    security(("Bearer token" = []))
+)]
+pub(super) async fn categories(
+    Extension(user): Extension<AppUser>,
+    service: State<Arc<ExpenseService>>,
+) -> Result<Json<Vec<CategoryResponse>>, HttpError> {
+    service
+        .get_all_categories(user.id)
+        .await
+        .map_err(|err| match err {
+            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+        })?
+        .ok_or(HttpError::from(StatusCode::INTERNAL_SERVER_ERROR))
+        .map(|tags| {
+            Json(convert_to_vec(tags, |t| CategoryResponse {
                 id: t.id,
                 name: t.name,
             }))

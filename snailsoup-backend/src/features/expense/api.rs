@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get, post},
+    routing::{get, patch, post},
     Router,
 };
 use serde::{Deserialize, Serialize};
@@ -53,7 +53,14 @@ pub fn get_private_routes(app_state: AppState) -> Router {
         .route("/api/expenses/", get(handlers::expenses))
         .route("/api/expenses/query/", get(handlers::expenses_query))
         .route("/api/expense-tags/", get(handlers::tags))
+        .route("/api/expense-tags/", post(handlers::add_tag))
+        .route("/api/expense-tags/:tag_id", patch(handlers::update_tag))
         .route("/api/expense-categories/", get(handlers::categories))
+        .route("/api/expense-categories/", post(handlers::add_category))
+        .route(
+            "/api/expense-categories/:category_id",
+            patch(handlers::update_category),
+        )
         .with_state(app_state)
 }
 

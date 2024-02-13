@@ -119,6 +119,13 @@ impl ExpenseService {
         Ok(Some(tags))
     }
 
+    pub async fn get_tag(&self, tag_id: Uuid) -> Result<Option<Tag>, ExpenseServiceGetError> {
+        self.expense_repository
+            .get_tag(tag_id)
+            .await
+            .map_err(|_| ExpenseServiceGetError::InternalServerError)
+    }
+
     pub async fn create_tag(
         &self,
         user_id: Uuid,
@@ -146,6 +153,13 @@ impl ExpenseService {
             .map_err(|_| ExpenseServiceCreateError::Internal)
     }
 
+    pub async fn update_tag(&self, tag: Tag) -> Result<Option<Uuid>, ExpenseServiceGetError> {
+        self.expense_repository
+            .update_tag(tag)
+            .await
+            .map_err(|_| ExpenseServiceGetError::InternalServerError)
+    }
+
     pub async fn get_all_categories(
         &self,
         user_id: Uuid,
@@ -159,13 +173,23 @@ impl ExpenseService {
             return Ok(None);
         }
 
-        let tags = self
+        let categories = self
             .expense_repository
             .get_all_categories_by_user_id(user_id)
             .await
             .map_err(|_| ExpenseServiceGetError::InternalServerError)?;
 
-        Ok(Some(tags))
+        Ok(Some(categories))
+    }
+
+    pub async fn get_category(
+        &self,
+        category_id: Uuid,
+    ) -> Result<Option<Category>, ExpenseServiceGetError> {
+        self.expense_repository
+            .get_category(category_id)
+            .await
+            .map_err(|_| ExpenseServiceGetError::InternalServerError)
     }
 
     pub async fn create_category(
@@ -193,5 +217,15 @@ impl ExpenseService {
             .insert_category(new_category)
             .await
             .map_err(|_| ExpenseServiceCreateError::Internal)
+    }
+
+    pub async fn update_category(
+        &self,
+        category: Category,
+    ) -> Result<Option<Uuid>, ExpenseServiceGetError> {
+        self.expense_repository
+            .update_category(category)
+            .await
+            .map_err(|_| ExpenseServiceGetError::InternalServerError)
     }
 }

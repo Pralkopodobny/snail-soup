@@ -8,15 +8,22 @@ use axum::{
 use uuid::Uuid;
 
 use crate::{
-    domain::app_user::AppUser,
+    domain::{
+        app_user::AppUser,
+        expense::{Category, Tag},
+    },
     features::response::HttpError,
-    services::expense::{ExpenseService, ExpenseServiceGetError},
+    services::expense::{ExpenseService, ExpenseServiceCreateError, ExpenseServiceGetError},
     utils::{convert_to_vec, period::DatePeriod},
 };
 
 type GetError = ExpenseServiceGetError;
+type CreateError = ExpenseServiceCreateError;
 
-use super::api::{CategoryResponse, ExpenseResponse, FullExpenseResponse, TagResponse};
+use super::api::{
+    CategoryResponse, CreateCategoryRequest, CreateTagRequest, ExpenseResponse,
+    FullExpenseResponse, TagResponse,
+};
 
 #[utoipa::path(
     get,
@@ -141,6 +148,74 @@ pub(super) async fn tags(
 }
 
 #[utoipa::path(
+    post,
+    path = "/api/expense-tags/",
+    tag = "Expenses",
+    request_body = CreateTagRequest,
+    responses(
+        (status = StatusCode::OK, description = "Expense found successfully", body = Uuid),
+    ),
+    security(("Bearer token" = []))
+)]
+pub(super) async fn add_tag(
+    Extension(user): Extension<AppUser>,
+    service: State<Arc<ExpenseService>>,
+    Json(body): Json<CreateTagRequest>,
+) -> Result<Json<Uuid>, HttpError> {
+    service
+        .create_tag(user.id, body.name.as_str())
+        .await
+        .map_err(|e| match e {
+            CreateError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+            CreateError::NoUser => HttpError::from(StatusCode::NOT_FOUND),
+            CreateError::Validation(m) => HttpError::from((StatusCode::BAD_REQUEST, m.as_str())),
+        })
+        .map(|id| Json(id))
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/expense-tags/{tag_id}",
+    tag = "Expenses",
+    request_body = CreateCategoryRequest,
+    responses(
+        (status = StatusCode::OK, description = "Expense found successfully", body = Uuid),
+    ),
+    security(("Bearer token" = []))
+)]
+pub(super) async fn update_tag(
+    Extension(user): Extension<AppUser>,
+    service: State<Arc<ExpenseService>>,
+    Path(tag_id): Path<Uuid>,
+    Json(body): Json<CreateTagRequest>,
+) -> Result<Json<Uuid>, HttpError> {
+    let tag = service
+        .get_tag(tag_id)
+        .await
+        .map_err(|e| match e {
+            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+        })?
+        .ok_or(HttpError::from(StatusCode::NOT_FOUND))?;
+
+    if tag.user_id != user.id {
+        Err(HttpError::from(StatusCode::FORBIDDEN))?
+    }
+
+    service
+        .update_tag(Tag {
+            id: tag_id,
+            user_id: user.id,
+            name: body.name,
+        })
+        .await
+        .map_err(|e| match e {
+            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+        })?
+        .ok_or(HttpError::from(StatusCode::NOT_FOUND))
+        .map(|id| Json(id))
+}
+
+#[utoipa::path(
     get,
     path = "/api/expense-categories/",
     tag = "Expenses",
@@ -166,4 +241,72 @@ pub(super) async fn categories(
                 name: t.name,
             }))
         })
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/expense-categories/",
+    tag = "Expenses",
+    request_body = CreateCategoryRequest,
+    responses(
+        (status = StatusCode::OK, description = "Expense found successfully", body = Uuid),
+    ),
+    security(("Bearer token" = []))
+)]
+pub(super) async fn add_category(
+    Extension(user): Extension<AppUser>,
+    service: State<Arc<ExpenseService>>,
+    Json(body): Json<CreateCategoryRequest>,
+) -> Result<Json<Uuid>, HttpError> {
+    service
+        .create_category(user.id, body.name.as_str())
+        .await
+        .map_err(|e| match e {
+            CreateError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+            CreateError::NoUser => HttpError::from(StatusCode::NOT_FOUND),
+            CreateError::Validation(m) => HttpError::from((StatusCode::BAD_REQUEST, m.as_str())),
+        })
+        .map(|id| Json(id))
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/expense-categories/{category_id}",
+    tag = "Expenses",
+    request_body = CreateCategoryRequest,
+    responses(
+        (status = StatusCode::OK, description = "Expense found successfully", body = Uuid),
+    ),
+    security(("Bearer token" = []))
+)]
+pub(super) async fn update_category(
+    Extension(user): Extension<AppUser>,
+    service: State<Arc<ExpenseService>>,
+    Path(category_id): Path<Uuid>,
+    Json(body): Json<CreateCategoryRequest>,
+) -> Result<Json<Uuid>, HttpError> {
+    let category = service
+        .get_category(category_id)
+        .await
+        .map_err(|e| match e {
+            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+        })?
+        .ok_or(HttpError::from(StatusCode::NOT_FOUND))?;
+
+    if category.user_id != user.id {
+        Err(HttpError::from(StatusCode::FORBIDDEN))?
+    }
+
+    service
+        .update_category(Category {
+            id: category_id,
+            user_id: user.id,
+            name: body.name,
+        })
+        .await
+        .map_err(|e| match e {
+            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+        })?
+        .ok_or(HttpError::from(StatusCode::NOT_FOUND))
+        .map(|id| Json(id))
 }

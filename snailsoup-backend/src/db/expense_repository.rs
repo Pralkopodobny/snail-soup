@@ -120,6 +120,22 @@ impl ExpenseRepository {
         Ok(tags)
     }
 
+    pub async fn get_tag(&self, id: Uuid) -> Result<Option<Tag>, sqlx::Error> {
+        let tag = sqlx::query_as!(
+            Tag,
+            "
+            SELECT *
+            FROM user_tags 
+            WHERE id = $1
+            ",
+            id,
+        )
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(tag)
+    }
+
     pub async fn insert_tag(&self, tag: Tag) -> Result<Uuid, sqlx::Error> {
         let id = sqlx::query_scalar!(
             r#"
@@ -130,6 +146,21 @@ impl ExpenseRepository {
             tag.name
         )
         .fetch_one(&self.pool)
+        .await?;
+
+        Ok(id)
+    }
+
+    pub async fn update_tag(&self, tag: Tag) -> Result<Option<Uuid>, sqlx::Error> {
+        let id = sqlx::query_scalar!(
+            r#"
+            UPDATE user_tags SET name = $1, user_id = $2 WHERE id = $3 RETURNING id
+            "#,
+            tag.name,
+            tag.user_id,
+            tag.id
+        )
+        .fetch_optional(&self.pool)
         .await?;
 
         Ok(id)
@@ -167,6 +198,22 @@ impl ExpenseRepository {
         Ok(categories)
     }
 
+    pub async fn get_category(&self, id: Uuid) -> Result<Option<Category>, sqlx::Error> {
+        let category = sqlx::query_as!(
+            Category,
+            "
+            SELECT *
+            FROM user_categories 
+            WHERE id = $1
+            ",
+            id,
+        )
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(category)
+    }
+
     pub async fn insert_category(&self, category: Category) -> Result<Uuid, sqlx::Error> {
         let id = sqlx::query_scalar!(
             r#"
@@ -177,6 +224,21 @@ impl ExpenseRepository {
             category.name
         )
         .fetch_one(&self.pool)
+        .await?;
+
+        Ok(id)
+    }
+
+    pub async fn update_category(&self, category: Category) -> Result<Option<Uuid>, sqlx::Error> {
+        let id = sqlx::query_scalar!(
+            r#"
+            UPDATE user_categories SET name = $1, user_id = $2 WHERE id = $3 RETURNING id
+            "#,
+            category.name,
+            category.user_id,
+            category.id
+        )
+        .fetch_optional(&self.pool)
         .await?;
 
         Ok(id)

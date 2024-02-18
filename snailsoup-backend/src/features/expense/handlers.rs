@@ -27,9 +27,9 @@ use super::api::{
     path = "/api/expenses/{expense_id}",
     tag = "Expenses",
     responses(
-        (status = StatusCode::OK, description = "Expense found successfully", body = FullExpenseResponse),
-        (status = StatusCode::NOT_FOUND, description = "Expense not found"),
-        (status = StatusCode::FORBIDDEN, description = "Not sufficient permissions"),
+        (status = StatusCode::OK, body = FullExpenseResponse),
+        (status = StatusCode::NOT_FOUND),
+        (status = StatusCode::FORBIDDEN),
     ),
     security(("Bearer token" = []))
 )]
@@ -58,7 +58,7 @@ pub(super) async fn expense_by_id(
     path = "/api/expenses/",
     tag = "Expenses",
     responses(
-        (status = StatusCode::OK, description = "Expense found successfully", body = [ExpenseResponse]),
+        (status = StatusCode::OK, body = [ExpenseResponse]),
     ),
     security(("Bearer token" = []))
 )]
@@ -81,7 +81,7 @@ pub(super) async fn expenses(
     path = "/api/expenses/query/",
     tag = "Expenses",
     responses(
-        (status = StatusCode::OK, description = "Expense found successfully", body = [ExpenseResponse]),
+        (status = StatusCode::OK, body = [ExpenseResponse]),
     ),
     params(
         (
@@ -121,7 +121,7 @@ pub(super) async fn expenses_query(
     path = "/api/expense-tags/",
     tag = "Expenses",
     responses(
-        (status = StatusCode::OK, description = "Expense found successfully", body = [TagResponse]),
+        (status = StatusCode::OK, body = [TagResponse]),
     ),
     security(("Bearer token" = []))
 )]
@@ -150,7 +150,7 @@ pub(super) async fn tags(
     tag = "Expenses",
     request_body = CreateTagRequest,
     responses(
-        (status = StatusCode::OK, description = "Expense found successfully", body = Uuid),
+        (status = StatusCode::OK, body = Uuid),
     ),
     security(("Bearer token" = []))
 )]
@@ -179,7 +179,7 @@ pub(super) async fn add_tag(
     tag = "Expenses",
     request_body = CreateTagRequest,
     responses(
-        (status = StatusCode::OK, description = "Expense found successfully", body = Uuid),
+        (status = StatusCode::OK, body = Uuid),
     ),
     security(("Bearer token" = []))
 )]
@@ -222,7 +222,7 @@ pub(super) async fn update_tag(
     path = "/api/expense-categories/",
     tag = "Expenses",
     responses(
-        (status = StatusCode::OK, description = "Expense found successfully", body = [CategoryResponse]),
+        (status = StatusCode::OK, body = [CategoryResponse]),
     ),
     security(("Bearer token" = []))
 )]
@@ -251,7 +251,7 @@ pub(super) async fn categories(
     tag = "Expenses",
     request_body = CreateCategoryRequest,
     responses(
-        (status = StatusCode::OK, description = "Expense found successfully", body = Uuid),
+        (status = StatusCode::OK, body = Uuid),
     ),
     security(("Bearer token" = []))
 )]
@@ -280,7 +280,7 @@ pub(super) async fn add_category(
     tag = "Expenses",
     request_body = CreateCategoryRequest,
     responses(
-        (status = StatusCode::OK, description = "Expense found successfully", body = Uuid),
+        (status = StatusCode::OK, body = Uuid),
     ),
     security(("Bearer token" = []))
 )]

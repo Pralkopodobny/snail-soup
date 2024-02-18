@@ -14,8 +14,8 @@ use super::api::{LoginRequest, RegisterRequest};
     tag = "Auth",
     request_body = LoginRequest,
     responses(
-        (status = OK, description = "list expenses successfully"),
-        (status = UNAUTHORIZED, description = "user with such username and password does not exist"),
+        (status = OK),
+        (status = UNAUTHORIZED, description = "User with provided username and password does not exist"),
     )
 )]
 pub(super) async fn login(
@@ -41,8 +41,8 @@ pub(super) async fn login(
     tag = "Auth",
     request_body = RegisterRequest,
     responses(
-        (status = CREATED, description = "user registered", body=Uuid),
-        (status = BAD_REQUEST, description = "username is already used")
+        (status = CREATED, body=Uuid),
+        (status = BAD_REQUEST)
     )
 )]
 pub(super) async fn register(

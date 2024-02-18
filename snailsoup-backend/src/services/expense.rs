@@ -33,10 +33,7 @@ impl ExpenseService {
         }
     }
 
-    pub async fn get_expense(
-        &self,
-        expense_id: Uuid,
-    ) -> Result<Option<FullExpense>, GetError> {
+    pub async fn get_expense(&self, expense_id: Uuid) -> Result<Option<FullExpense>, GetError> {
         Ok(self
             .expense_repository
             .get_expense(expense_id)
@@ -97,10 +94,7 @@ impl ExpenseService {
         Ok(Some(expenses))
     }
 
-    pub async fn get_tags_for_user(
-        &self,
-        user_id: Uuid,
-    ) -> Result<Option<Vec<Tag>>, GetError> {
+    pub async fn get_tags_for_user(&self, user_id: Uuid) -> Result<Option<Vec<Tag>>, GetError> {
         let user = self
             .user_repository
             .get(user_id)
@@ -126,11 +120,7 @@ impl ExpenseService {
             .map_err(|_| GetError::Internal)
     }
 
-    pub async fn create_tag(
-        &self,
-        user_id: Uuid,
-        name: &str,
-    ) -> Result<Uuid, CreateError> {
+    pub async fn create_tag(&self, user_id: Uuid, name: &str) -> Result<Uuid, CreateError> {
         let user = self
             .user_repository
             .get(user_id)
@@ -182,21 +172,14 @@ impl ExpenseService {
         Ok(Some(categories))
     }
 
-    pub async fn get_category(
-        &self,
-        category_id: Uuid,
-    ) -> Result<Option<Category>, GetError> {
+    pub async fn get_category(&self, category_id: Uuid) -> Result<Option<Category>, GetError> {
         self.expense_repository
             .get_category(category_id)
             .await
             .map_err(|_| GetError::Internal)
     }
 
-    pub async fn create_category(
-        &self,
-        user_id: Uuid,
-        name: &str,
-    ) -> Result<Uuid, CreateError> {
+    pub async fn create_category(&self, user_id: Uuid, name: &str) -> Result<Uuid, CreateError> {
         let user = self
             .user_repository
             .get(user_id)
@@ -219,10 +202,7 @@ impl ExpenseService {
             .map_err(|_| CreateError::Internal)
     }
 
-    pub async fn update_category(
-        &self,
-        category: Category,
-    ) -> Result<Option<Uuid>, GetError> {
+    pub async fn update_category(&self, category: Category) -> Result<Option<Uuid>, GetError> {
         self.expense_repository
             .update_category(category)
             .await

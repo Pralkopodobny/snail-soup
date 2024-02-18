@@ -1,7 +1,7 @@
 use sqlx::{Pool, Postgres};
 use uuid::Uuid;
 
-use crate::domain::app_user::AppUser;
+use crate::{db::schema::AppUserSchema, domain::app_user::AppUser};
 
 #[derive(Clone)]
 pub struct AppUserRepository {
@@ -15,7 +15,7 @@ impl AppUserRepository {
 
     pub async fn get(&self, id: Uuid) -> Result<Option<AppUser>, sqlx::Error> {
         let user = sqlx::query_as!(
-            AppUser,
+            AppUserSchema,
             "
             SELECT * 
             FROM app_users 
@@ -24,13 +24,15 @@ impl AppUserRepository {
             id
         )
         .fetch_optional(&self.pool)
-        .await?;
+        .await?
+        .map(|e| e.into());
+
         Ok(user)
     }
 
     pub async fn insert(&self, user: AppUser) -> Result<AppUser, sqlx::Error> {
         let created_user = sqlx::query_as!(
-            AppUser,
+            AppUserSchema,
             "
         INSERT INTO app_users(id, username, password_hash, account_role) 
         VALUES ($1, $2, $3, $4) 
@@ -42,13 +44,15 @@ impl AppUserRepository {
             user.account_role
         )
         .fetch_one(&self.pool)
-        .await?;
+        .await?
+        .into();
+
         Ok(created_user)
     }
 
     pub async fn get_by_name(&self, username: &str) -> Result<Option<AppUser>, sqlx::Error> {
         let user = sqlx::query_as!(
-            AppUser,
+            AppUserSchema,
             "
             SELECT * 
             FROM app_users 
@@ -57,20 +61,26 @@ impl AppUserRepository {
             username
         )
         .fetch_optional(&self.pool)
-        .await?;
+        .await?
+        .map(|e| e.into());
+
         Ok(user)
     }
 
     pub async fn get_all(&self) -> Result<Vec<AppUser>, sqlx::Error> {
         let users = sqlx::query_as!(
-            AppUser,
+            AppUserSchema,
             "
             SELECT * 
             FROM app_users
             "
         )
         .fetch_all(&self.pool)
-        .await?;
+        .await?
+        .into_iter()
+        .map(|e| e.into())
+        .collect();
+
         Ok(users)
     }
 }

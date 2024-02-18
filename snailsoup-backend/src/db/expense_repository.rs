@@ -2,6 +2,7 @@ use sqlx::{Pool, Postgres};
 use uuid::Uuid;
 
 use crate::{
+    db::schema::{CategorySchema, ExpenseSchema, TagSchema},
     domain::expense::{Category, Expense, FullExpense, Tag},
     utils::period::DatePeriod,
 };
@@ -17,7 +18,7 @@ impl ExpenseRepository {
 
     pub async fn get_expense(&self, expense_id: Uuid) -> Result<Option<FullExpense>, sqlx::Error> {
         let expense = sqlx::query_as!(
-            Expense,
+            ExpenseSchema,
             "
             SELECT *
             FROM expenses
@@ -26,7 +27,8 @@ impl ExpenseRepository {
             expense_id
         )
         .fetch_optional(&self.pool)
-        .await?;
+        .await?
+        .map(|e| e.into());
 
         match expense {
             Some(e) => {
@@ -50,15 +52,18 @@ impl ExpenseRepository {
     }
 
     pub async fn get_all_expenses(&self) -> Result<Vec<Expense>, sqlx::Error> {
-        let expenses = sqlx::query_as!(
-            Expense,
+        let expenses: Vec<Expense> = sqlx::query_as!(
+            ExpenseSchema,
             "
             SELECT *
             FROM expenses
             "
         )
         .fetch_all(&self.pool)
-        .await?;
+        .await?
+        .into_iter()
+        .map(|e| e.into())
+        .collect();
 
         Ok(expenses)
     }
@@ -68,7 +73,7 @@ impl ExpenseRepository {
         user_id: Uuid,
     ) -> Result<Vec<Expense>, sqlx::Error> {
         let expenses = sqlx::query_as!(
-            Expense,
+            ExpenseSchema,
             "
             SELECT *
             FROM expenses
@@ -77,7 +82,10 @@ impl ExpenseRepository {
             user_id
         )
         .fetch_all(&self.pool)
-        .await?;
+        .await?
+        .into_iter()
+        .map(|e| e.into())
+        .collect();
 
         Ok(expenses)
     }
@@ -88,7 +96,7 @@ impl ExpenseRepository {
         period: DatePeriod,
     ) -> Result<Vec<Expense>, sqlx::Error> {
         let expenses = sqlx::query_as!(
-            Expense,
+            ExpenseSchema,
             "
             SELECT *
             FROM expenses
@@ -99,14 +107,17 @@ impl ExpenseRepository {
             period.to
         )
         .fetch_all(&self.pool)
-        .await?;
+        .await?
+        .into_iter()
+        .map(|e| e.into())
+        .collect();
 
         Ok(expenses)
     }
 
     pub async fn get_all_tags_by_user_id(&self, user_id: Uuid) -> Result<Vec<Tag>, sqlx::Error> {
         let tags = sqlx::query_as!(
-            Tag,
+            TagSchema,
             "
             SELECT *
             FROM user_tags 
@@ -115,14 +126,17 @@ impl ExpenseRepository {
             user_id
         )
         .fetch_all(&self.pool)
-        .await?;
+        .await?
+        .into_iter()
+        .map(|e| e.into())
+        .collect();
 
         Ok(tags)
     }
 
     pub async fn get_tag(&self, id: Uuid) -> Result<Option<Tag>, sqlx::Error> {
         let tag = sqlx::query_as!(
-            Tag,
+            TagSchema,
             "
             SELECT *
             FROM user_tags 
@@ -131,7 +145,8 @@ impl ExpenseRepository {
             id,
         )
         .fetch_optional(&self.pool)
-        .await?;
+        .await?
+        .map(|e| e.into());
 
         Ok(tag)
     }
@@ -184,7 +199,7 @@ impl ExpenseRepository {
         user_id: Uuid,
     ) -> Result<Vec<Category>, sqlx::Error> {
         let categories = sqlx::query_as!(
-            Category,
+            CategorySchema,
             "
             SELECT *
             FROM user_categories 
@@ -193,14 +208,17 @@ impl ExpenseRepository {
             user_id
         )
         .fetch_all(&self.pool)
-        .await?;
+        .await?
+        .into_iter()
+        .map(|e| e.into())
+        .collect();
 
         Ok(categories)
     }
 
     pub async fn get_category(&self, id: Uuid) -> Result<Option<Category>, sqlx::Error> {
         let category = sqlx::query_as!(
-            Category,
+            CategorySchema,
             "
             SELECT *
             FROM user_categories 
@@ -209,7 +227,8 @@ impl ExpenseRepository {
             id,
         )
         .fetch_optional(&self.pool)
-        .await?;
+        .await?
+        .map(|e| e.into());
 
         Ok(category)
     }

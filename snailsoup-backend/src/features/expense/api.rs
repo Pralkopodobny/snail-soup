@@ -129,13 +129,13 @@ pub struct TagResponse {
 impl From<FullExpense> for FullExpenseResponse {
     fn from(value: FullExpense) -> Self {
         FullExpenseResponse {
-            id: value.expense.id,
-            user: value.expense.user_id,
-            category: value.expense.category_id,
-            tags: value.tags_ids,
-            description: value.expense.description,
-            expense_date: value.expense.expense_date,
-            cost: value.expense.cost,
+            id: value.id,
+            user: value.data.expense.user_id,
+            category: value.data.expense.category_id,
+            tags: value.data.tags_ids,
+            description: value.data.expense.description,
+            expense_date: value.data.expense.expense_date,
+            cost: value.data.expense.cost,
         }
     }
 }
@@ -144,11 +144,11 @@ impl From<Expense> for ExpenseResponse {
     fn from(value: Expense) -> Self {
         ExpenseResponse {
             id: value.id,
-            user: value.user_id,
-            category: value.category_id,
-            description: value.description,
-            expense_date: value.expense_date,
-            cost: value.cost,
+            user: value.data.user_id,
+            category: value.data.category_id,
+            description: value.data.description,
+            expense_date: value.data.expense_date,
+            cost: value.data.cost,
         }
     }
 }

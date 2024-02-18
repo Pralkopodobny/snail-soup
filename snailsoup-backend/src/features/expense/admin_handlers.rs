@@ -110,7 +110,7 @@ pub(super) async fn admin_tags_by_user(
         .map(|tags| {
             Json(convert_to_vec(tags, |t| TagResponse {
                 id: t.id,
-                name: t.name,
+                name: t.data.name,
             }))
         })
 }
@@ -139,7 +139,7 @@ pub(super) async fn admin_categories_by_user(
         .map(|categories| {
             Json(convert_to_vec(categories, |c| CategoryResponse {
                 id: c.id,
-                name: c.name,
+                name: c.data.name,
             }))
         })
 }

@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use crate::domain::{
     app_user::AppUser,
-    expense::{Category, Expense, Tag},
+    expense::{Category, CategoryData, Expense, ExpenseData, Tag, TagData},
 };
 
 pub struct ExpenseSchema {
@@ -37,11 +37,13 @@ impl ExpenseSchema {
     pub fn to_expense(self) -> Expense {
         Expense {
             id: self.id,
-            user_id: self.user_id,
-            category_id: self.category_id,
-            description: self.description,
-            expense_date: self.expense_date,
-            cost: self.cost,
+            data: ExpenseData {
+                user_id: self.user_id,
+                category_id: self.category_id,
+                description: self.description,
+                expense_date: self.expense_date,
+                cost: self.cost,
+            },
         }
     }
 }
@@ -56,8 +58,10 @@ impl Into<Category> for CategorySchema {
     fn into(self) -> Category {
         Category {
             id: self.id,
-            user_id: self.user_id,
-            name: self.name,
+            data: CategoryData {
+                user_id: self.user_id,
+                name: self.name,
+            },
         }
     }
 }
@@ -66,8 +70,10 @@ impl Into<Tag> for TagSchema {
     fn into(self) -> Tag {
         Tag {
             id: self.id,
-            user_id: self.user_id,
-            name: self.name,
+            data: TagData {
+                user_id: self.user_id,
+                name: self.name,
+            },
         }
     }
 }

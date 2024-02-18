@@ -10,7 +10,7 @@ use uuid::Uuid;
 use crate::{
     domain::{
         app_user::AppUser,
-        expense::{Category, Tag},
+        expense::{Category, CategoryData, Tag, TagData},
     },
     features::response::HttpError,
     services::expense::{CreateError, ExpenseService, GetError},
@@ -44,7 +44,7 @@ pub(super) async fn expense_by_id(
 
     match expense {
         Some(e) => {
-            if e.expense.user_id != user.id {
+            if e.data.expense.user_id != user.id {
                 Err(StatusCode::FORBIDDEN)?
             }
             Ok(Json(FullExpenseResponse::from(e)))
@@ -139,7 +139,7 @@ pub(super) async fn tags(
         .map(|tags| {
             Json(convert_to_vec(tags, |t| TagResponse {
                 id: t.id,
-                name: t.name,
+                name: t.data.name,
             }))
         })
 }
@@ -194,15 +194,17 @@ pub(super) async fn update_tag(
         })?
         .ok_or(HttpError::from(StatusCode::NOT_FOUND))?;
 
-    if tag.user_id != user.id {
+    if tag.data.user_id != user.id {
         Err(HttpError::from(StatusCode::FORBIDDEN))?
     }
 
     service
         .update_tag(Tag {
             id: tag_id,
-            user_id: user.id,
-            name: body.name,
+            data: TagData {
+                user_id: user.id,
+                name: body.name,
+            },
         })
         .await
         .map_err(|e| match e {
@@ -235,7 +237,7 @@ pub(super) async fn categories(
         .map(|tags| {
             Json(convert_to_vec(tags, |t| CategoryResponse {
                 id: t.id,
-                name: t.name,
+                name: t.data.name,
             }))
         })
 }
@@ -290,15 +292,17 @@ pub(super) async fn update_category(
         })?
         .ok_or(HttpError::from(StatusCode::NOT_FOUND))?;
 
-    if category.user_id != user.id {
+    if category.data.user_id != user.id {
         Err(HttpError::from(StatusCode::FORBIDDEN))?
     }
 
     service
         .update_category(Category {
             id: category_id,
-            user_id: user.id,
-            name: body.name,
+            data: CategoryData {
+                user_id: user.id,
+                name: body.name,
+            },
         })
         .await
         .map_err(|e| match e {

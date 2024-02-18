@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use crate::{
     db::{AppUserRepository, ExpenseRepository},
-    domain::expense::{Category, Expense, FullExpense, Tag},
+    domain::expense::{Category, CategoryData, Expense, FullExpense, Tag, TagData},
     utils::period::DatePeriod,
 };
 use std::sync::Arc;
@@ -133,8 +133,10 @@ impl ExpenseService {
 
         let new_tag = Tag {
             id: Uuid::new_v4(),
-            user_id: user_id,
-            name: name.to_owned(),
+            data: TagData {
+                user_id: user_id,
+                name: name.to_owned(),
+            },
         };
 
         self.expense_repository
@@ -192,8 +194,10 @@ impl ExpenseService {
 
         let new_category = Category {
             id: Uuid::new_v4(),
-            user_id: user_id,
-            name: name.to_owned(),
+            data: CategoryData {
+                user_id: user_id,
+                name: name.to_owned(),
+            },
         };
 
         self.expense_repository

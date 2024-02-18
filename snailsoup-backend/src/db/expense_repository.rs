@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::{
     db::schema::{CategorySchema, ExpenseSchema, TagSchema},
-    domain::expense::{Category, Expense, FullExpense, Tag},
+    domain::expense::{Category, Expense, FullExpense, FullExpenseData, Tag},
     utils::period::DatePeriod,
 };
 
@@ -17,7 +17,7 @@ impl ExpenseRepository {
     }
 
     pub async fn get_expense(&self, expense_id: Uuid) -> Result<Option<FullExpense>, sqlx::Error> {
-        let expense = sqlx::query_as!(
+        let expense: Option<Expense> = sqlx::query_as!(
             ExpenseSchema,
             "
             SELECT *
@@ -43,8 +43,11 @@ impl ExpenseRepository {
                 .await?;
 
                 Ok(Some(FullExpense {
-                    expense: e,
-                    tags_ids: tags,
+                    id: e.id,
+                    data: FullExpenseData {
+                        expense: e.data,
+                        tags_ids: tags,
+                    },
                 }))
             }
             None => Ok(None),
@@ -157,8 +160,8 @@ impl ExpenseRepository {
             INSERT INTO user_tags (id, user_id, name) VALUES ($1, $2, $3) RETURNING id
             "#,
             tag.id,
-            tag.user_id,
-            tag.name
+            tag.data.user_id,
+            tag.data.name
         )
         .fetch_one(&self.pool)
         .await?;
@@ -171,8 +174,8 @@ impl ExpenseRepository {
             r#"
             UPDATE user_tags SET name = $1, user_id = $2 WHERE id = $3 RETURNING id
             "#,
-            tag.name,
-            tag.user_id,
+            tag.data.name,
+            tag.data.user_id,
             tag.id
         )
         .fetch_optional(&self.pool)
@@ -239,8 +242,8 @@ impl ExpenseRepository {
             INSERT INTO user_categories (id, user_id, name) VALUES ($1, $2, $3) RETURNING id
             "#,
             category.id,
-            category.user_id,
-            category.name
+            category.data.user_id,
+            category.data.name
         )
         .fetch_one(&self.pool)
         .await?;
@@ -253,8 +256,8 @@ impl ExpenseRepository {
             r#"
             UPDATE user_categories SET name = $1, user_id = $2 WHERE id = $3 RETURNING id
             "#,
-            category.name,
-            category.user_id,
+            category.data.name,
+            category.data.user_id,
             category.id
         )
         .fetch_optional(&self.pool)

@@ -8,8 +8,14 @@ use utoipa_redoc::{Redoc, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::features::expense::admin_handlers::{
-    __path_all_expenses, __path_categories_by_user, __path_create_category, __path_create_tag,
-    __path_expense_by_id, __path_tags_by_user, __path_user_expenses,
+    __path_admin_all_expenses, __path_admin_categories_by_user, __path_admin_create_category,
+    __path_admin_create_tag, __path_admin_expense_by_id, __path_admin_tags_by_user,
+    __path_admin_user_expenses,
+};
+use crate::features::expense::handlers::{
+    __path_add_category, __path_add_expense, __path_add_tag, __path_categories,
+    __path_expense_by_id, __path_expenses, __path_expenses_query, __path_tags,
+    __path_update_category, __path_update_tag,
 };
 
 use crate::features::user::admin_handlers::{__path_all_users, __path_user_by_id};
@@ -28,7 +34,8 @@ pub fn get_routes() -> Router {
 #[openapi(
             paths(
                 login, register, //Auth
-                all_expenses, expense_by_id, tags_by_user, categories_by_user, create_category, create_tag, user_expenses, //Admin - Expenses
+                admin_all_expenses, admin_expense_by_id, admin_tags_by_user, admin_categories_by_user, admin_create_category, admin_create_tag, admin_user_expenses, //Admin - Expenses
+                expense_by_id, expenses, add_expense, expenses_query, tags, categories, add_category, update_category, add_tag, update_tag, //Expenses
                 all_users, user_by_id, //Admin - User
                 me //User
             ),
@@ -40,6 +47,7 @@ pub fn get_routes() -> Router {
                     super::expense::api::TagResponse,
                     super::expense::api::CreateTagRequest,
                     super::expense::api::CreateCategoryRequest,
+                    super::expense::api::CreateExpenseRequest,
                     super::user::api::UserResponse,
                     super::auth::api::LoginRequest,
                     super::auth::api::RegisterRequest

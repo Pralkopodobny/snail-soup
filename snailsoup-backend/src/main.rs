@@ -4,6 +4,7 @@ mod db;
 mod domain;
 mod features;
 mod services;
+mod utils;
 
 use std::sync::Arc;
 

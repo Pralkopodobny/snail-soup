@@ -13,12 +13,9 @@ use crate::{
         expense::{Category, Tag},
     },
     features::response::HttpError,
-    services::expense::{ExpenseService, ExpenseServiceCreateError, ExpenseServiceGetError},
+    services::expense::{ExpenseService, CreateError, GetError},
     utils::{convert_to_vec, period::DatePeriod},
 };
-
-type GetError = ExpenseServiceGetError;
-type CreateError = ExpenseServiceCreateError;
 
 use super::api::{
     CategoryResponse, CreateCategoryRequest, CreateTagRequest, ExpenseResponse,
@@ -42,7 +39,7 @@ pub(super) async fn expense_by_id(
     service: State<Arc<ExpenseService>>,
 ) -> Result<Json<FullExpenseResponse>, HttpError> {
     let expense = service.get_expense(expense_id).await.map_err(|e| match e {
-        GetError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
+        GetError::Internal => StatusCode::INTERNAL_SERVER_ERROR,
     })?;
 
     match expense {
@@ -70,10 +67,10 @@ pub(super) async fn expenses(
     service: State<Arc<ExpenseService>>,
 ) -> Result<Json<Vec<ExpenseResponse>>, HttpError> {
     service
-        .get_user_expenses(user.id)
+        .get_expenses_for_user(user.id)
         .await
         .map_err(|e| match e {
-            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+            GetError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
         })?
         .ok_or(HttpError::from(StatusCode::INTERNAL_SERVER_ERROR))
         .map(|expenses| Json(convert_to_vec(expenses, |e| ExpenseResponse::from(e))))
@@ -110,10 +107,10 @@ pub(super) async fn expenses_query(
     }
 
     service
-        .get_user_expenses_in_period(user.id, period)
+        .get_expenses_for_user_in_period(user.id, period)
         .await
         .map_err(|e| match e {
-            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+            GetError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
         })?
         .ok_or(HttpError::from(StatusCode::INTERNAL_SERVER_ERROR))
         .map(|expenses| Json(convert_to_vec(expenses, |e| ExpenseResponse::from(e))))
@@ -133,10 +130,10 @@ pub(super) async fn tags(
     service: State<Arc<ExpenseService>>,
 ) -> Result<Json<Vec<TagResponse>>, HttpError> {
     service
-        .get_all_tags(user.id)
+        .get_tags_for_user(user.id)
         .await
         .map_err(|err| match err {
-            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+            GetError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
         })?
         .ok_or(HttpError::from(StatusCode::INTERNAL_SERVER_ERROR))
         .map(|tags| {
@@ -177,7 +174,7 @@ pub(super) async fn add_tag(
     patch,
     path = "/api/expense-tags/{tag_id}",
     tag = "Expenses",
-    request_body = CreateCategoryRequest,
+    request_body = CreateTagRequest,
     responses(
         (status = StatusCode::OK, description = "Expense found successfully", body = Uuid),
     ),
@@ -193,7 +190,7 @@ pub(super) async fn update_tag(
         .get_tag(tag_id)
         .await
         .map_err(|e| match e {
-            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+            GetError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
         })?
         .ok_or(HttpError::from(StatusCode::NOT_FOUND))?;
 
@@ -209,7 +206,7 @@ pub(super) async fn update_tag(
         })
         .await
         .map_err(|e| match e {
-            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+            GetError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
         })?
         .ok_or(HttpError::from(StatusCode::NOT_FOUND))
         .map(|id| Json(id))
@@ -229,10 +226,10 @@ pub(super) async fn categories(
     service: State<Arc<ExpenseService>>,
 ) -> Result<Json<Vec<CategoryResponse>>, HttpError> {
     service
-        .get_all_categories(user.id)
+        .get_categories_for_user(user.id)
         .await
         .map_err(|err| match err {
-            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+            GetError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
         })?
         .ok_or(HttpError::from(StatusCode::INTERNAL_SERVER_ERROR))
         .map(|tags| {
@@ -289,7 +286,7 @@ pub(super) async fn update_category(
         .get_category(category_id)
         .await
         .map_err(|e| match e {
-            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+            GetError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
         })?
         .ok_or(HttpError::from(StatusCode::NOT_FOUND))?;
 
@@ -305,7 +302,7 @@ pub(super) async fn update_category(
         })
         .await
         .map_err(|e| match e {
-            GetError::InternalServerError => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+            GetError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
         })?
         .ok_or(HttpError::from(StatusCode::NOT_FOUND))
         .map(|id| Json(id))

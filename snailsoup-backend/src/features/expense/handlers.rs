@@ -10,7 +10,7 @@ use uuid::Uuid;
 use crate::{
     domain::{
         app_user::AppUser,
-        expense::{Category, CategoryData, Tag, TagData},
+        expense::{Category, CategoryData, ExpenseData, FullExpenseData, Tag, TagData},
     },
     features::response::HttpError,
     services::expense::{CreateError, ExpenseService, GetError},
@@ -18,8 +18,8 @@ use crate::{
 };
 
 use super::api::{
-    CategoryResponse, CreateCategoryRequest, CreateTagRequest, ExpenseResponse,
-    FullExpenseResponse, TagResponse,
+    CategoryResponse, CreateCategoryRequest, CreateExpenseRequest, CreateTagRequest,
+    ExpenseResponse, FullExpenseResponse, TagResponse,
 };
 
 #[utoipa::path(
@@ -114,6 +114,43 @@ pub(super) async fn expenses_query(
         })?
         .ok_or(HttpError::from(StatusCode::INTERNAL_SERVER_ERROR))
         .map(|expenses| Json(convert_to_vec(expenses, |e| ExpenseResponse::from(e))))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/expenses/",
+    tag = "Expenses",
+    request_body = CreateExpenseRequest,
+    responses(
+        (status = StatusCode::OK, body = Uuid),
+    ),
+    security(("Bearer token" = []))
+)]
+pub(super) async fn add_expense(
+    Extension(user): Extension<AppUser>,
+    service: State<Arc<ExpenseService>>,
+    Json(body): Json<CreateExpenseRequest>,
+) -> Result<Json<Uuid>, HttpError> {
+    service
+        .create_expense(FullExpenseData {
+            expense: ExpenseData {
+                user_id: user.id,
+                category_id: body.category,
+                description: body.description,
+                expense_date: body.expense_date,
+                cost: body.cost,
+            },
+            tags_ids: body.tags.unwrap_or(vec![]),
+        })
+        .await
+        .map_err(|e| match e {
+            CreateError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+            CreateError::NoUser => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
+            CreateError::Validation(message) => {
+                HttpError::from((StatusCode::BAD_REQUEST, message.as_str()))
+            }
+        })
+        .map(|id| Json(id))
 }
 
 #[utoipa::path(

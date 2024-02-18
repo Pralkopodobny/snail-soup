@@ -2,7 +2,9 @@ use uuid::Uuid;
 
 use crate::{
     db::{AppUserRepository, ExpenseRepository},
-    domain::expense::{Category, CategoryData, Expense, FullExpense, Tag, TagData},
+    domain::expense::{
+        Category, CategoryData, Expense, FullExpense, FullExpenseData, Tag, TagData,
+    },
     utils::period::DatePeriod,
 };
 use std::sync::Arc;
@@ -92,6 +94,47 @@ impl ExpenseService {
             .map_err(|_| GetError::Internal)?;
 
         Ok(Some(expenses))
+    }
+
+    pub async fn create_expense(&self, full_expense: FullExpenseData) -> Result<Uuid, CreateError> {
+        let user = self
+            .user_repository
+            .get(full_expense.expense.user_id)
+            .await
+            .map_err(|_| CreateError::NoUser)?;
+
+        if user.is_none() {
+            return Err(CreateError::NoUser);
+        }
+
+        if !full_expense.tags_ids.is_empty() {
+            let user_tags: Vec<Uuid> = self
+                .expense_repository
+                .get_all_tags_by_user_id(full_expense.expense.user_id)
+                .await
+                .map_err(|_| CreateError::Internal)?
+                .into_iter()
+                .map(|user_tag| user_tag.id)
+                .collect();
+
+            if !full_expense
+                .tags_ids
+                .iter()
+                .all(|tag| user_tags.contains(tag))
+            {
+                return Err(CreateError::Validation("Invalid tags list".to_owned()));
+            }
+        }
+
+        let new_expense = FullExpense {
+            id: Uuid::new_v4(),
+            data: full_expense,
+        };
+
+        self.expense_repository
+            .insert_full_expense(new_expense)
+            .await
+            .map_err(|_| CreateError::Internal)
     }
 
     pub async fn get_tags_for_user(&self, user_id: Uuid) -> Result<Option<Vec<Tag>>, GetError> {

@@ -1,4 +1,4 @@
-use sqlx::{Pool, Postgres};
+use sqlx::{Pool, Postgres, QueryBuilder};
 use uuid::Uuid;
 
 use crate::{
@@ -116,6 +116,41 @@ impl ExpenseRepository {
         .collect();
 
         Ok(expenses)
+    }
+
+    pub async fn insert_full_expense(&self, expense: FullExpense) -> Result<Uuid, sqlx::Error> {
+        let mut transaction = self.pool.begin().await?;
+
+        let added_expense = sqlx::query_scalar!(
+            r#"
+            INSERT INTO expenses (id, user_id, category_id, description, expense_date, cost)
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING id
+            "#,
+            expense.id,
+            expense.data.expense.user_id,
+            expense.data.expense.category_id,
+            expense.data.expense.description,
+            expense.data.expense.expense_date,
+            expense.data.expense.cost,
+        )
+        .fetch_one(&mut *transaction)
+        .await?;
+
+        if !expense.data.tags_ids.is_empty() {
+            QueryBuilder::new("INSERT INTO expense_tags (id, user_tag_id, expense_id)")
+                .push_values(expense.data.tags_ids, |mut b, user_tag_id| {
+                    b.push_bind(Uuid::new_v4())
+                        .push_bind(user_tag_id)
+                        .push_bind(added_expense);
+                })
+                .build()
+                .execute(&mut *transaction)
+                .await?;
+        }
+
+        transaction.commit().await?;
+
+        Ok(added_expense)
     }
 
     pub async fn get_all_tags_by_user_id(&self, user_id: Uuid) -> Result<Vec<Tag>, sqlx::Error> {

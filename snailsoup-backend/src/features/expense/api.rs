@@ -51,6 +51,7 @@ pub fn get_private_routes(app_state: AppState) -> Router {
     Router::new()
         .route("/api/expenses/:id", get(handlers::expense_by_id))
         .route("/api/expenses/", get(handlers::expenses))
+        .route("/api/expenses/", post(handlers::add_expense))
         .route("/api/expenses/query/", get(handlers::expenses_query))
         .route("/api/expense-tags/", get(handlers::tags))
         .route("/api/expense-tags/", post(handlers::add_tag))
@@ -90,6 +91,20 @@ pub struct FullExpenseResponse {
     pub category: Option<Uuid>,
     #[schema()]
     pub tags: Vec<Uuid>,
+    #[schema()]
+    pub description: Option<String>,
+    #[schema()]
+    pub expense_date: chrono::NaiveDate,
+    #[schema()]
+    pub cost: rust_decimal::Decimal,
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Clone)]
+pub struct CreateExpenseRequest {
+    #[schema()]
+    pub category: Option<Uuid>,
+    #[schema()]
+    pub tags: Option<Vec<Uuid>>,
     #[schema()]
     pub description: Option<String>,
     #[schema()]

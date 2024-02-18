@@ -160,7 +160,10 @@ pub(super) async fn add_tag(
     Json(body): Json<CreateTagRequest>,
 ) -> Result<Json<Uuid>, HttpError> {
     service
-        .create_tag(user.id, body.name.as_str())
+        .create_tag(TagData {
+            user_id: user.id,
+            name: body.name,
+        })
         .await
         .map_err(|e| match e {
             CreateError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
@@ -258,7 +261,10 @@ pub(super) async fn add_category(
     Json(body): Json<CreateCategoryRequest>,
 ) -> Result<Json<Uuid>, HttpError> {
     service
-        .create_category(user.id, body.name.as_str())
+        .create_category(CategoryData {
+            user_id: user.id,
+            name: body.name,
+        })
         .await
         .map_err(|e| match e {
             CreateError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),

@@ -120,10 +120,10 @@ impl ExpenseService {
             .map_err(|_| GetError::Internal)
     }
 
-    pub async fn create_tag(&self, user_id: Uuid, name: &str) -> Result<Uuid, CreateError> {
+    pub async fn create_tag(&self, tag: TagData) -> Result<Uuid, CreateError> {
         let user = self
             .user_repository
-            .get(user_id)
+            .get(tag.user_id)
             .await
             .map_err(|_| CreateError::Internal)?;
 
@@ -133,10 +133,7 @@ impl ExpenseService {
 
         let new_tag = Tag {
             id: Uuid::new_v4(),
-            data: TagData {
-                user_id: user_id,
-                name: name.to_owned(),
-            },
+            data: tag,
         };
 
         self.expense_repository
@@ -181,10 +178,10 @@ impl ExpenseService {
             .map_err(|_| GetError::Internal)
     }
 
-    pub async fn create_category(&self, user_id: Uuid, name: &str) -> Result<Uuid, CreateError> {
+    pub async fn create_category(&self, category: CategoryData) -> Result<Uuid, CreateError> {
         let user = self
             .user_repository
-            .get(user_id)
+            .get(category.user_id)
             .await
             .map_err(|_| CreateError::Internal)?;
 
@@ -194,10 +191,7 @@ impl ExpenseService {
 
         let new_category = Category {
             id: Uuid::new_v4(),
-            data: CategoryData {
-                user_id: user_id,
-                name: name.to_owned(),
-            },
+            data: category,
         };
 
         self.expense_repository

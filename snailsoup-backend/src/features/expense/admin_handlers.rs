@@ -7,6 +7,7 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::{
+    domain::expense::{CategoryData, TagData},
     features::response::HttpError,
     services::expense::{CreateError, ExpenseService, GetError},
     utils::convert_to_vec,
@@ -161,7 +162,10 @@ pub(super) async fn admin_create_category(
     Json(body): Json<CreateCategoryRequest>,
 ) -> Result<Json<Uuid>, HttpError> {
     service
-        .create_category(user_id, body.name.as_str())
+        .create_category(CategoryData {
+            user_id: user_id,
+            name: body.name,
+        })
         .await
         .map_err(|e| match e {
             CreateError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),
@@ -188,7 +192,10 @@ pub(super) async fn admin_create_tag(
     Json(body): Json<CreateTagRequest>,
 ) -> Result<Json<Uuid>, HttpError> {
     service
-        .create_tag(user_id, body.name.as_str())
+        .create_tag(TagData {
+            user_id: user_id,
+            name: body.name,
+        })
         .await
         .map_err(|e| match e {
             CreateError::Internal => HttpError::from(StatusCode::INTERNAL_SERVER_ERROR),

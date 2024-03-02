@@ -1,6 +1,30 @@
-version: "3.1"
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Docker compose reference guide at
+# https://docs.docker.com/go/compose-spec-reference/
 
+# Here the instructions define your application as a service called "server".
+# This service is built from the Dockerfile in the current directory.
+# You can add other services your application may depend on here, such as a
+# database or a cache. For examples, see the Awesome Compose repository:
+# https://github.com/docker/awesome-compose
 services:
+  snailsoup_backend:
+    container_name: snailsoup_backend
+    build:
+      context: .
+    ports:
+      - 3000:3000
+    environment:
+      - DATABASE_URL=postgres://postgres:password@snailsoup_db/snailsoup
+      - RUST_ENV=production
+      - SQLX_OFFLINE=true
+      - JWT_SECRET=my_ultra_secure_secret
+      - JWT_EXPIRED_IN=60m
+      - JWT_MAXAGE=60
+    depends_on:
+      db:
+        condition: service_healthy
+    
   db:
     container_name: snailsoup_db
     image: postgres:15.4
@@ -19,3 +43,4 @@ services:
       retries: 5
 volumes:
   pgdata:
+

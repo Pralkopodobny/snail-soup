@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE expenses SET category_id = NULL WHERE category_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "94c0cee6e75f4f73a5a5dd2455baddb50cb0de39ebe2cd644ddef3bb26065c5d"
+}

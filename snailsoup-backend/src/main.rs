@@ -20,9 +20,12 @@ use crate::{
 #[tokio::main]
 async fn main() {
     dotenv().ok();
+
+    let connection_string = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+
     let pool = match PgPoolOptions::new()
         .max_connections(5)
-        .connect("postgres://postgres:password@localhost/snailsoup")
+        .connect(connection_string.as_str())
         .await
     {
         Ok(p) => p,

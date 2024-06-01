@@ -22,7 +22,7 @@ use super::api::UserResponse;
     params(
         ("user_id" = Uuid, Path, description = "User database id to get User for"),
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn user_by_id(
     Path(user_id): Path<Uuid>,
@@ -43,7 +43,7 @@ pub(super) async fn user_by_id(
     responses(
         (status = StatusCode::OK, description = "list users successfully", body = [UserResponse])
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn all_users(service: State<Arc<UserService>>) -> impl IntoResponse {
     let users: Vec<UserResponse> = service

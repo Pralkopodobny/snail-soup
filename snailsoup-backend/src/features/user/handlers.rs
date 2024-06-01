@@ -11,7 +11,7 @@ use super::api::UserResponse;
     responses(
         (status = StatusCode::OK, description = "User found successfully", body = UserResponse),
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn me(Extension(user): Extension<AppUser>) -> impl IntoResponse {
     Json(UserResponse::from_user(user))

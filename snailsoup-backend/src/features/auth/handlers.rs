@@ -14,7 +14,7 @@ use super::api::{LoginRequest, RegisterRequest};
     tag = "Auth",
     request_body = LoginRequest,
     responses(
-        (status = OK),
+        (status = OK, body=Uuid),
         (status = UNAUTHORIZED, description = "User with provided username and password does not exist"),
     )
 )]

@@ -31,7 +31,7 @@ use super::api::{
         (status = StatusCode::NOT_FOUND),
         (status = StatusCode::FORBIDDEN),
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn expense_by_id(
     Extension(user): Extension<AppUser>,
@@ -60,7 +60,7 @@ pub(super) async fn expense_by_id(
     responses(
         (status = StatusCode::OK, body = [ExpenseResponse]),
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn expenses(
     Extension(user): Extension<AppUser>,
@@ -95,7 +95,7 @@ pub(super) async fn expenses(
             description = "End of queried period (exclusive)",
         ),
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn expenses_query(
     Extension(user): Extension<AppUser>,
@@ -124,7 +124,7 @@ pub(super) async fn expenses_query(
     responses(
         (status = StatusCode::OK, body = Uuid),
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn add_expense(
     Extension(user): Extension<AppUser>,
@@ -160,7 +160,7 @@ pub(super) async fn add_expense(
     responses(
         (status = StatusCode::OK, body = [TagResponse]),
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn tags(
     Extension(user): Extension<AppUser>,
@@ -189,7 +189,7 @@ pub(super) async fn tags(
     responses(
         (status = StatusCode::OK, body = Uuid),
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn add_tag(
     Extension(user): Extension<AppUser>,
@@ -218,7 +218,7 @@ pub(super) async fn add_tag(
     responses(
         (status = StatusCode::OK, body = Uuid),
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn update_tag(
     Extension(user): Extension<AppUser>,
@@ -261,7 +261,7 @@ pub(super) async fn update_tag(
     responses(
         (status = StatusCode::OK, body = [CategoryResponse]),
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn categories(
     Extension(user): Extension<AppUser>,
@@ -290,7 +290,7 @@ pub(super) async fn categories(
     responses(
         (status = StatusCode::OK, body = Uuid),
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn add_category(
     Extension(user): Extension<AppUser>,
@@ -319,7 +319,7 @@ pub(super) async fn add_category(
     responses(
         (status = StatusCode::OK, body = Uuid),
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn update_category(
     Extension(user): Extension<AppUser>,

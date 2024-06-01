@@ -26,7 +26,7 @@ use super::api::{
         (status = StatusCode::OK, body = FullExpenseResponse),
         (status = StatusCode::NOT_FOUND)
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn admin_expense_by_id(
     Path(expense_id): Path<Uuid>,
@@ -50,7 +50,7 @@ pub(super) async fn admin_expense_by_id(
         (status = StatusCode::OK, body = [ExpenseResponse]),
         (status = StatusCode::NOT_FOUND)
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn admin_user_expenses(
     Path(user_id): Path<Uuid>,
@@ -73,7 +73,7 @@ pub(super) async fn admin_user_expenses(
     responses(
         (status = StatusCode::OK, body = [ExpenseResponse])
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn admin_all_expenses(
     service: State<Arc<ExpenseService>>,
@@ -95,7 +95,7 @@ pub(super) async fn admin_all_expenses(
         (status = StatusCode::OK, body = [TagResponse]),
         (status = StatusCode::NOT_FOUND)
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn admin_tags_by_user(
     Path(user_id): Path<Uuid>,
@@ -124,7 +124,7 @@ pub(super) async fn admin_tags_by_user(
         (status = StatusCode::OK, body = [CategoryResponse]),
         (status = StatusCode::NOT_FOUND)
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn admin_categories_by_user(
     Path(user_id): Path<Uuid>,
@@ -154,7 +154,7 @@ pub(super) async fn admin_categories_by_user(
         (status = StatusCode::CREATED, body = Uuid),
         (status = StatusCode::NOT_FOUND)
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn admin_create_category(
     Path(user_id): Path<Uuid>,
@@ -184,7 +184,7 @@ pub(super) async fn admin_create_category(
         (status = StatusCode::CREATED, body = Uuid),
         (status = StatusCode::NOT_FOUND)
     ),
-    security(("Bearer token" = []))
+    security(("BearerToken" = []))
 )]
 pub(super) async fn admin_create_tag(
     Path(user_id): Path<Uuid>,

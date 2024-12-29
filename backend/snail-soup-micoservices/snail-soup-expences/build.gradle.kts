@@ -6,7 +6,7 @@ plugins {
     kotlin("plugin.jpa") version "1.9.25"
 }
 
-group = "org.snailsoup"
+group = "org.snailsoup.expences"
 version = "1.0-SNAPSHOT"
 
 java {

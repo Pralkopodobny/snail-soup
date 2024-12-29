@@ -1,4 +1,4 @@
-package org.snailsoup
+package org.snailsoup.auth
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;

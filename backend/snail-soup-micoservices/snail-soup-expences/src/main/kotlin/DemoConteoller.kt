@@ -1,5 +1,6 @@
-package org.snailsoup
+package org.snailsoup.expences
 
+import org.snailsoup.auth.MyService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController

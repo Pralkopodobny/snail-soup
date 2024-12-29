@@ -13,7 +13,7 @@ dependencyManagement {
     }
 }
 
-group = "org.snailsoup"
+group = "org.snailsoup.auth"
 version = "1.0-SNAPSHOT"
 
 repositories {

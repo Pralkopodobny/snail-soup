@@ -1,0 +1,37 @@
+services:
+  snailsoup_auth_service:
+    container_name: snailsoup_auth_service
+    build:
+      context: .
+    ports:
+      - 3000:3000
+    environment:
+      - DATABASE_URL=postgres://postgres:password@snailsoup_auth_db/snailsoup
+      - RUST_ENV=production
+      - SQLX_OFFLINE=true
+      - JWT_SECRET=my_ultra_secure_secret
+      - JWT_EXPIRED_IN=60m
+      - JWT_MAXAGE=20
+    depends_on:
+      snailsoup_auth_db:
+        condition: service_healthy
+    
+  snailsoup_auth_db:
+    container_name: snailsoup_auth_db
+    image: postgres:15.4
+    restart: no
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d postgres -U postgres"]
+      interval: 2s
+      timeout: 1s
+      retries: 5
+volumes:
+  pgdata:
+

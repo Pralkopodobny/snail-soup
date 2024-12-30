@@ -11,19 +11,19 @@ use crate::{
 pub(super) struct AppState {
     pub config: Config,
     pub auth_service: Arc<AuthService>,
-    pub user_service: Arc<UserService>
+    pub user_service: Arc<UserService>,
 }
 
 impl AppState {
     pub fn new(
         config: Config,
         auth_service: Arc<AuthService>,
-        user_service: Arc<UserService>
+        user_service: Arc<UserService>,
     ) -> AppState {
         AppState {
             config,
             auth_service,
-            user_service
+            user_service,
         }
     }
 }

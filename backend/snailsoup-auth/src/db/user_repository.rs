@@ -35,7 +35,7 @@ impl AppUserRepository {
             AppUserSchema,
             "
         INSERT INTO app_users(id, username, password_hash, account_role) 
-        VALUES ($1, $2, $3, $4) 
+        VALUES ($1, $2, $3, $4)
         RETURNING id, username, password_hash, account_role
         ",
             user.id,
@@ -54,7 +54,7 @@ impl AppUserRepository {
         let user = sqlx::query_as!(
             AppUserSchema,
             "
-            SELECT * 
+            SELECT *
             FROM app_users 
             WHERE username = $1
             ",
@@ -71,7 +71,7 @@ impl AppUserRepository {
         let users = sqlx::query_as!(
             AppUserSchema,
             "
-            SELECT * 
+            SELECT *
             FROM app_users
             "
         )

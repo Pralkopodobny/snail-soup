@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO app_users(id, username, password_hash, account_role) \n        VALUES ($1, $2, $3, $4) \n        RETURNING id, username, password_hash, account_role\n        ",
+  "query": "\n            SELECT *\n            FROM app_users\n            ",
   "describe": {
     "columns": [
       {
@@ -25,12 +25,7 @@
       }
     ],
     "parameters": {
-      "Left": [
-        "Uuid",
-        "Varchar",
-        "Varchar",
-        "Varchar"
-      ]
+      "Left": []
     },
     "nullable": [
       false,
@@ -39,5 +34,5 @@
       false
     ]
   },
-  "hash": "c9460321ff300dfc82ce1a471566ff938da872c4d7bf973abce299af8e69b0e4"
+  "hash": "b68bc4709c88cd65b662b9ce195cf9a72b3f5e5d5ed51b5854b1204ea23083f8"
 }

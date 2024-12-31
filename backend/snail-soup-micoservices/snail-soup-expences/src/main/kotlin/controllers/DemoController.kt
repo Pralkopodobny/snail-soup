@@ -1,4 +1,4 @@
-package org.snailsoup.expences
+package org.snailsoup.expences.controllers
 
 import org.snailsoup.auth.MyService
 import org.springframework.web.bind.annotation.GetMapping

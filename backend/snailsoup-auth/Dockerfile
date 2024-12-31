@@ -2,12 +2,13 @@
 
 FROM rust:1.83 as builder
 WORKDIR /usr/src/snailsoup
-COPY . .
 
 # Install host build dependencies.
 RUN apt-get install libssl-dev pkg-config
 
 ENV SQLX_OFFLINE=true
+
+COPY . .
 
 RUN cargo install --path .
 
